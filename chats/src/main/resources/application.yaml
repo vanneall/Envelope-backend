@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: chats
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/messenger

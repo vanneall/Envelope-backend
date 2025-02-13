@@ -1,0 +1,61 @@
+package com.point.chats.common.data.entities
+
+import com.point.chats.chats.rest.requests.ChatUpdateRequest
+import com.point.chats.chats.rest.requests.CreateChatRequest
+import com.point.chats.participants.rest.errors.exceptions.UserFreezeException
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.Document
+
+@Document(collection = "chats")
+data class Chat(
+    @Id
+    val id: String? = null,
+    var name: String,
+    var description: String? = null,
+    var pinnedMessage: String? = null,
+    val photos: MutableList<String?> = mutableListOf(),
+    val activeUserAuthorities: MutableMap<String, UserAuthorities> = mutableMapOf(),
+    val freezeUsers: MutableMap<String, FreezeReasons> = mutableMapOf(),
+    val events: MutableList<Event> = mutableListOf(),
+)
+
+
+fun Chat.addActiveParticipant(uuid: String) {
+    activeUserAuthorities[uuid] = UserAuthorities()
+}
+
+fun Chat.removeActiveParticipant(uuid: String) {
+    freezeUsers.remove(uuid)
+}
+
+fun Chat.addFreezeParticipant(uuid: String) {
+    freezeUsers[uuid] = FreezeReasons()
+}
+
+fun Chat.removeFreezeParticipant(uuid: String) {
+    freezeUsers.remove(uuid)
+}
+
+fun CreateChatRequest.toChat() = Chat(
+    name = name,
+    description = description,
+    photos = mutableListOf(photo),
+    activeUserAuthorities = participants
+        .associateBy({ it }, { UserAuthorities(isAdmin = it == ownerId) })
+        .toMutableMap(),
+)
+
+fun Chat.update(newChat: ChatUpdateRequest) {
+    name = newChat.name ?: name
+    description = newChat.description ?: description
+    newChat.photo?.let { photos.addFirst(it) }
+}
+
+fun Chat.requireUserAuthorities(userId: String): UserAuthorities {
+    val userAuthorities = activeUserAuthorities[userId]
+    if (userAuthorities == null) {
+        freezeUsers[userId] ?: throw UserFreezeException(userId)
+        throw UserFreezeException(userId)
+    }
+    return userAuthorities
+}
