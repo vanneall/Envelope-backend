@@ -27,7 +27,7 @@ class EventsService(private val photoService: PhotoService, private val chatRepo
         .drop(page)
         .take(size)
 
-    fun createEvent(chatId: String, createMessageRequest: CreateMessageRequest): String {
+    fun createEvent(chatId: String, createMessageRequest: CreateMessageRequest): Message {
         var photos: MutableList<Long>? = null
 
         if (createMessageRequest.photos != null) {
@@ -41,10 +41,10 @@ class EventsService(private val photoService: PhotoService, private val chatRepo
         }
 
         val message = createMessageRequest.toMessage(photos)
-        return saveEvent(message, message.senderId, chatId)
+        return saveEvent(message, message.senderId, chatId) as Message
     }
 
-    fun saveEvent(event: Event, eventOwnerId: String, chatId: String): String {
+    fun saveEvent(event: Event, eventOwnerId: String, chatId: String): Event {
         val chat = chatRepository.findById(chatId).getOrNull() ?: throw ChatNotFoundException(chatId)
 
         val userAuthorities = chat.requireUserAuthorities(eventOwnerId)
@@ -62,7 +62,7 @@ class EventsService(private val photoService: PhotoService, private val chatRepo
 
         chat.events.add(event)
         chatRepository.save(chat)
-        return event.id
+        return event
     }
 
     fun pinMessage(chatId: String, messageId: String, userId: String): Chat {
