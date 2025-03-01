@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: photo
+  datasource:
+    url: jdbc:postgresql://localhost:5432/envelope_photos
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8084
