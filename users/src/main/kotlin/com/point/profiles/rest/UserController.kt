@@ -23,7 +23,7 @@ class UserController(
     }
 
     @PutMapping("/{id}")
-    fun updateUser(@PathVariable id: UUID, @RequestBody updateRequest: UpdateUserRequest): User {
+    fun updateUser(@PathVariable id: UUID, @ModelAttribute updateRequest: UpdateUserRequest): User {
         return userService.updateUser(id, updateRequest)
     }
 

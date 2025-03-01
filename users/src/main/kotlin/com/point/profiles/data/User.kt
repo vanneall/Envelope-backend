@@ -30,7 +30,7 @@ data class User(
     @ElementCollection
     @CollectionTable(name = "user_photos", joinColumns = [JoinColumn(name = "user_id")])
     @Column(name = "photo")
-    val photos: MutableList<String> = mutableListOf()
+    val photos: MutableList<Long> = mutableListOf()
 )
 
 

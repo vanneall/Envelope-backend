@@ -5,5 +5,5 @@ import java.util.*
 data class RegisterRequest(
     val id: UUID,
     val name: String,
-    val birthDate: Date,
+    val birthDate: Date = Date(),
 )

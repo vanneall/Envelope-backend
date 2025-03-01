@@ -1,15 +1,17 @@
 package com.point.profiles.services
 
 import com.point.profiles.data.User
+import com.point.profiles.errors.exceptions.PhotoUploadException
 import com.point.profiles.errors.exceptions.UserNotFoundException
 import com.point.profiles.repository.UserRepository
 import com.point.profiles.rest.requests.RegisterRequest
 import com.point.profiles.rest.requests.UpdateUserRequest
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.util.*
 
 @Service
-class UserService(private val userRepository: UserRepository) {
+class UserService(private val photoService: PhotoService, private val userRepository: UserRepository) {
     fun registerUser(request: RegisterRequest): User {
         val user = User(
             id = request.id,
@@ -27,10 +29,19 @@ class UserService(private val userRepository: UserRepository) {
 
     fun updateUser(id: UUID, updateRequest: UpdateUserRequest): User {
         val user = getUserById(id)
+        if (updateRequest.photo != null) {
+            try {
+                val id = photoService.uploadPhoto(updateRequest.photo).id
+                user.photos.addFirst(id)
+            } catch (e: WebClientResponseException) {
+                throw PhotoUploadException(status = e.statusCode, message = e.message)
+            }
+        }
+
         val updatedUser = user.copy(
             name = updateRequest.name ?: user.name,
             status = updateRequest.status ?: user.status,
-            photos = updateRequest.photos?.let { user.photos.apply { add(it) } } ?: user.photos
+            photos = user.photos,
         )
         return userRepository.save(updatedUser)
     }

@@ -1,5 +1,6 @@
 package com.point.profiles.errors.advices
 
+import com.point.profiles.errors.exceptions.PhotoUploadException
 import com.point.profiles.errors.exceptions.UserNotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,6 +22,13 @@ class ControllerAdvice {
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(ErrorResponse("INTERNAL_ERROR", ex.message ?: "Generic error"))
+    }
+
+    @ExceptionHandler(PhotoUploadException::class)
+    fun handleGenericException(ex: PhotoUploadException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(ex.status)
+            .body(ErrorResponse(ex.status.value().toString(), ex.message ?: "Photo upload error"))
     }
 
     data class ErrorResponse(

@@ -11,6 +11,22 @@
           </set>
         </option>
       </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/photo" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/photo" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/users" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/users" />
+          </set>
+        </option>
+      </GradleProjectSettings>
     </option>
   </component>
 </project>
