@@ -6,7 +6,7 @@ import java.util.*
 @Entity(name = "envelope_users")
 data class User(
     @Id
-    val id: UUID,
+    val id: String,
 
     val name: String,
     val birthDate: Date,
@@ -20,12 +20,12 @@ data class User(
     @ElementCollection
     @CollectionTable(name = "user_friends", joinColumns = [JoinColumn(name = "user_id")])
     @Column(name = "friend_id")
-    val friends: MutableList<UUID> = mutableListOf(),
+    val friends: MutableList<String> = mutableListOf(),
 
     @ElementCollection
     @CollectionTable(name = "user_blocked", joinColumns = [JoinColumn(name = "user_id")])
     @Column(name = "blocked_id")
-    val blockedUsers: MutableList<UUID> = mutableListOf(),
+    val blockedUsers: MutableList<String> = mutableListOf(),
 
     @ElementCollection
     @CollectionTable(name = "user_photos", joinColumns = [JoinColumn(name = "user_id")])

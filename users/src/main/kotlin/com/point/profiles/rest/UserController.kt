@@ -18,37 +18,37 @@ class UserController(
     fun registerUser(@RequestBody request: RegisterRequest): User = userService.registerUser(request)
 
     @GetMapping("/{id}")
-    fun getUser(@PathVariable id: UUID): User {
+    fun getUser(@PathVariable id: String): User {
         return userService.getUserById(id)
     }
 
     @PutMapping("/{id}")
-    fun updateUser(@PathVariable id: UUID, @ModelAttribute updateRequest: UpdateUserRequest): User {
+    fun updateUser(@PathVariable id: String, @ModelAttribute updateRequest: UpdateUserRequest): User {
         return userService.updateUser(id, updateRequest)
     }
 
     @PutMapping("/{id}/last-seen")
-    fun updateLastSeen(@PathVariable id: UUID) {
+    fun updateLastSeen(@PathVariable id: String) {
         userService.updateLastSeen(id)
     }
 
     @PostMapping("/{id}/contacts/{contactId}")
-    fun addContact(@PathVariable id: UUID, @PathVariable contactId: UUID) {
+    fun addContact(@PathVariable id: String, @PathVariable contactId: String) {
         userService.addContact(id, contactId)
     }
 
     @DeleteMapping("/{id}/contacts/{contactId}")
-    fun removeContact(@PathVariable id: UUID, @PathVariable contactId: UUID) {
+    fun removeContact(@PathVariable id: String, @PathVariable contactId: String) {
         userService.removeContact(id, contactId)
     }
 
     @PostMapping("/{id}/block/{blockedId}")
-    fun blockUser(@PathVariable id: UUID, @PathVariable blockedId: UUID) {
+    fun blockUser(@PathVariable id: String, @PathVariable blockedId: String) {
         userService.blockUser(id, blockedId)
     }
 
     @DeleteMapping("/{id}/block/{blockedId}")
-    fun unblockUser(@PathVariable id: UUID, @PathVariable blockedId: UUID) {
+    fun unblockUser(@PathVariable id: String, @PathVariable blockedId: String) {
         userService.unblockUser(id, blockedId)
     }
 }

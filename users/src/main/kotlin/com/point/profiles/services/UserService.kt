@@ -21,13 +21,13 @@ class UserService(private val photoService: PhotoService, private val userReposi
         return userRepository.save(user)
     }
 
-    fun getUserById(id: UUID): User {
+    fun getUserById(id: String): User {
         return userRepository.findById(id).orElseThrow {
             UserNotFoundException(id.toString())
         }
     }
 
-    fun updateUser(id: UUID, updateRequest: UpdateUserRequest): User {
+    fun updateUser(id: String, updateRequest: UpdateUserRequest): User {
         val user = getUserById(id)
         if (updateRequest.photo != null) {
             try {
@@ -46,13 +46,13 @@ class UserService(private val photoService: PhotoService, private val userReposi
         return userRepository.save(updatedUser)
     }
 
-    fun updateLastSeen(id: UUID) {
+    fun updateLastSeen(id: String) {
         val user = getUserById(id)
         user.lastSeen = Date()
         userRepository.save(user)
     }
 
-    fun addContact(userId: UUID, contactId: UUID) {
+    fun addContact(userId: String, contactId: String) {
         val user = getUserById(userId)
         if (contactId !in user.friends) {
             user.friends.add(contactId)
@@ -60,7 +60,7 @@ class UserService(private val photoService: PhotoService, private val userReposi
         }
     }
 
-    fun removeContact(userId: UUID, contactId: UUID) {
+    fun removeContact(userId: String, contactId: String) {
         val user = getUserById(userId)
         if (contactId in user.friends) {
             user.friends.remove(contactId)
@@ -68,7 +68,7 @@ class UserService(private val photoService: PhotoService, private val userReposi
         }
     }
 
-    fun blockUser(userId: UUID, blockedId: UUID) {
+    fun blockUser(userId: String, blockedId: String) {
         val user = getUserById(userId)
         if (blockedId !in user.blockedUsers) {
             user.blockedUsers.add(blockedId)
@@ -76,7 +76,7 @@ class UserService(private val photoService: PhotoService, private val userReposi
         }
     }
 
-    fun unblockUser(userId: UUID, blockedId: UUID) {
+    fun unblockUser(userId: String, blockedId: String) {
         val user = getUserById(userId)
         if (blockedId in user.blockedUsers) {
             user.blockedUsers.remove(blockedId)
