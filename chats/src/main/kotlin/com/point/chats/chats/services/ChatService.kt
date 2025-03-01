@@ -8,22 +8,29 @@ import com.point.chats.common.data.entities.update
 import com.point.chats.common.data.sources.ChatRepository
 import com.point.chats.common.errors.exceptions.ChatNotFoundException
 import com.point.chats.common.errors.exceptions.UserNotFoundException
+import com.point.chats.common.service.PhotoService
 import org.springframework.stereotype.Service
 import kotlin.jvm.optionals.getOrNull
 
 @Service
-class ChatService(private val chatRepository: ChatRepository) {
+class ChatService(private val photoService: PhotoService, private val chatRepository: ChatRepository) {
 
     fun getChat(chatId: String): Chat = chatRepository.findById(chatId)
         .orElseThrow { throw ChatNotFoundException(chatId) }
 
-    fun createChat(request: CreateChatRequest): String = requireNotNull(chatRepository.save(request.toChat()).id)
+    fun createChat(request: CreateChatRequest): String {
+        val photoId = request.photo?.let {
+            mutableListOf(photoService.uploadPhoto(it).id)
+        } ?: mutableListOf()
+        return requireNotNull(chatRepository.save(request.toChat(photoId)).id)
+    }
 
     fun updateChat(chatId: String, userId: String, updateRequest: ChatUpdateRequest): Chat {
         val chat = chatRepository.findById(chatId).getOrNull() ?: throw ChatNotFoundException(chatId)
         chat.activeUserAuthorities[userId] ?: throw UserNotFoundException(userId)
+        val photoId = updateRequest.photo?.let { photoService.uploadPhoto(it).id }
 
-        chat.update(newChat = updateRequest)
+        chat.update(newChat = updateRequest, photoId)
 
         return chatRepository.save(chat)
     }

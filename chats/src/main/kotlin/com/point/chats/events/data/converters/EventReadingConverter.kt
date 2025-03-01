@@ -13,7 +13,11 @@ class EventReadingConverter : Converter<Document, Event> {
         return when (source.getString("_class")) {
             "message" -> Message(
                 senderId = source.getString("senderId"),
-                content = source.getString("content")
+                content = source.getString("content"),
+                photos = source.getList("photos", Any::class.java)
+                    ?.map { (it as Number).toLong() }
+                    ?.toMutableList()
+                    ?: mutableListOf(),
             )
 
             "notification" -> Notification(

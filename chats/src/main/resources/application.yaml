@@ -4,3 +4,5 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost:27017/messenger
+server:
+  port: 8082

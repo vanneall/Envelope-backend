@@ -13,7 +13,7 @@ data class Chat(
     var name: String,
     var description: String? = null,
     var pinnedMessage: String? = null,
-    val photos: MutableList<String?> = mutableListOf(),
+    val photos: MutableList<Long> = mutableListOf(),
     val activeUserAuthorities: MutableMap<String, UserAuthorities> = mutableMapOf(),
     val freezeUsers: MutableMap<String, FreezeReasons> = mutableMapOf(),
     val events: MutableList<Event> = mutableListOf(),
@@ -36,19 +36,19 @@ fun Chat.removeFreezeParticipant(uuid: String) {
     freezeUsers.remove(uuid)
 }
 
-fun CreateChatRequest.toChat() = Chat(
+fun CreateChatRequest.toChat(photos: MutableList<Long>) = Chat(
     name = name,
     description = description,
-    photos = mutableListOf(photo),
+    photos = photos,
     activeUserAuthorities = participants
         .associateBy({ it }, { UserAuthorities(isAdmin = it == ownerId) })
         .toMutableMap(),
 )
 
-fun Chat.update(newChat: ChatUpdateRequest) {
+fun Chat.update(newChat: ChatUpdateRequest, photoId: Long? = null) {
     name = newChat.name ?: name
     description = newChat.description ?: description
-    newChat.photo?.let { photos.addFirst(it) }
+    photoId?.let { photos.addFirst(it) }
 }
 
 fun Chat.requireUserAuthorities(userId: String): UserAuthorities {

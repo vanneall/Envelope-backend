@@ -21,7 +21,7 @@ class EventRestController(private val eventsService: EventsService) {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun createEvent(@PathVariable chatId: String, @RequestBody message: CreateMessageRequest): MessageCreatedResponse =
+    fun createEvent(@PathVariable chatId: String, @ModelAttribute message: CreateMessageRequest): MessageCreatedResponse =
         MessageCreatedResponse(eventsService.createEvent(chatId, message))
 
     @PostMapping("/pin/{messageId}")

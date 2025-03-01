@@ -3,7 +3,9 @@ package com.point.chats.events.services
 import com.point.chats.common.data.entities.*
 import com.point.chats.common.data.sources.ChatRepository
 import com.point.chats.common.errors.exceptions.ChatNotFoundException
+import com.point.chats.common.errors.exceptions.PhotoUploadException
 import com.point.chats.common.errors.exceptions.UserNotFoundException
+import com.point.chats.common.service.PhotoService
 import com.point.chats.events.data.entities.Message
 import com.point.chats.events.data.entities.Notification
 import com.point.chats.events.data.entities.toMessage
@@ -11,11 +13,12 @@ import com.point.chats.events.rest.requests.CreateMessageRequest
 import com.point.chats.participants.rest.errors.exceptions.UserInviteDeniedException
 import com.point.chats.participants.rest.errors.exceptions.UserWriteMessageDeniedException
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import kotlin.jvm.optionals.getOrElse
 import kotlin.jvm.optionals.getOrNull
 
 @Service
-class EventsService(private val chatRepository: ChatRepository) {
+class EventsService(private val photoService: PhotoService, private val chatRepository: ChatRepository) {
 
     fun getChatEvents(chatId: String, page: Int, size: Int): List<Event> = chatRepository.findById(chatId)
         .getOrElse { throw ChatNotFoundException(chatId) }
@@ -25,7 +28,19 @@ class EventsService(private val chatRepository: ChatRepository) {
         .take(size)
 
     fun createEvent(chatId: String, createMessageRequest: CreateMessageRequest): String {
-        val message = createMessageRequest.toMessage()
+        var photos: MutableList<Long>? = null
+
+        if (createMessageRequest.photos != null) {
+            val requestPhotos = createMessageRequest.photos
+            try {
+                photos = MutableList(requestPhotos.size) { index -> photoService.uploadPhoto(requestPhotos[index]).id }
+
+            } catch (e: WebClientResponseException) {
+                throw PhotoUploadException(status = e.statusCode, message = e.message)
+            }
+        }
+
+        val message = createMessageRequest.toMessage(photos)
         return saveEvent(message, message.senderId, chatId)
     }
 

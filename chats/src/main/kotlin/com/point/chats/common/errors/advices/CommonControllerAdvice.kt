@@ -1,6 +1,7 @@
 package com.point.chats.common.errors.advices
 
 import com.point.chats.common.errors.exceptions.ChatNotFoundException
+import com.point.chats.common.errors.exceptions.PhotoUploadException
 import com.point.chats.common.errors.exceptions.UserNotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -18,5 +19,10 @@ class CommonControllerAdvice {
     @ExceptionHandler(UserNotFoundException::class)
     fun handleUserNotFound(ex: UserNotFoundException): ResponseEntity<Map<String, String>> {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("reason" to ex.message.orEmpty()))
+    }
+
+    @ExceptionHandler(PhotoUploadException::class)
+    fun handleUserNotFound(ex: PhotoUploadException): ResponseEntity<Map<String, String>> {
+        return ResponseEntity.status(ex.status).body(mapOf("reason" to ex.message.orEmpty()))
     }
 }

@@ -19,14 +19,14 @@ class ChatsRestController(private val chatService: ChatService) {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun createChat(@RequestBody request: CreateChatRequest): ChatCreatedResponse =
+    fun createChat(@ModelAttribute request: CreateChatRequest): ChatCreatedResponse =
         ChatCreatedResponse(chatService.createChat(request))
 
     @PatchMapping("/{chatId}")
     fun updateChat(
         @PathVariable chatId: String,
         @RequestParam userId: String,
-        @RequestBody updateRequest: ChatUpdateRequest
+        @ModelAttribute updateRequest: ChatUpdateRequest
     ): ResponseEntity<Chat> {
         val updatedChat = chatService.updateChat(chatId, userId, updateRequest)
         return ResponseEntity.ok(updatedChat)

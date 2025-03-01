@@ -13,10 +13,12 @@ data class Message(
     override val id: String = UUID.randomUUID().toString(),
     val timestamp: Instant = Instant.now(),
     val senderId: String,
-    val content: String
+    val content: String,
+    val photos: MutableList<Long>?,
 ) : Event
 
-fun CreateMessageRequest.toMessage() = Message(
+fun CreateMessageRequest.toMessage(photos: MutableList<Long>? = null) = Message(
     senderId = senderId,
     content = content,
+    photos = photos,
 )
