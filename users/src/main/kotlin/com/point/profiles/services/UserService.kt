@@ -12,18 +12,31 @@ import java.util.*
 
 @Service
 class UserService(private val photoService: PhotoService, private val userRepository: UserRepository) {
+
     fun registerUser(request: RegisterRequest): User {
+        val photos = if (request.photo != null) {
+            try {
+                val id = photoService.uploadPhoto(request.photo).id
+                mutableListOf(id)
+            } catch (e: WebClientResponseException) {
+                throw PhotoUploadException(status = e.statusCode, message = e.message)
+            }
+        } else {
+            mutableListOf()
+        }
+
         val user = User(
             id = request.id,
             name = request.name,
             birthDate = request.birthDate,
+            photos = photos,
         )
         return userRepository.save(user)
     }
 
     fun getUserById(id: String): User {
         return userRepository.findById(id).orElseThrow {
-            UserNotFoundException(id.toString())
+            UserNotFoundException(id)
         }
     }
 

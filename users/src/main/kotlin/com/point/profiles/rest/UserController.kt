@@ -15,7 +15,7 @@ class UserController(
 ) {
 
     @PostMapping
-    fun registerUser(@RequestBody request: RegisterRequest): User = userService.registerUser(request)
+    fun registerUser(@ModelAttribute request: RegisterRequest): User = userService.registerUser(request)
 
     @GetMapping("/{id}")
     fun getUser(@PathVariable id: String): User {
