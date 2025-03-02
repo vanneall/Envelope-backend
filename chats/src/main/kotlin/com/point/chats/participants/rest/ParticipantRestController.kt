@@ -15,7 +15,7 @@ class ParticipantRestController(private val participantService: ParticipantServi
     @ResponseStatus(HttpStatus.OK)
     fun updateParticipantPermissions(
         @PathVariable chatId: String,
-        @PathVariable userId: String,
+        @RequestHeader("X-User-ID") userId: String,
         @RequestBody updateRequest: ParticipantUpdateRequest,
     ): Chat = participantService.updateParticipantPermissions(chatId, userId, updateRequest)
 

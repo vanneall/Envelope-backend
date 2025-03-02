@@ -5,10 +5,6 @@ import com.point.chats.events.rest.requests.CreateMessageRequest
 import com.point.chats.events.rest.responses.MessageCreatedResponse
 import com.point.chats.events.services.EventsService
 import org.springframework.http.HttpStatus
-import org.springframework.messaging.handler.annotation.DestinationVariable
-import org.springframework.messaging.handler.annotation.MessageMapping
-import org.springframework.messaging.handler.annotation.Payload
-import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -33,7 +29,7 @@ class EventRestController(private val eventsService: EventsService) {
     fun pinMessage(
         @PathVariable chatId: String,
         @PathVariable messageId: String,
-        @RequestParam userId: String
+        @RequestHeader("X-User-ID") userId: String,
     ) {
         eventsService.pinMessage(chatId, messageId, userId)
     }

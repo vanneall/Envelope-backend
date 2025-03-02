@@ -25,7 +25,7 @@ class ChatsRestController(private val chatService: ChatService) {
     @PatchMapping("/{chatId}")
     fun updateChat(
         @PathVariable chatId: String,
-        @RequestParam userId: String,
+        @RequestHeader("X-User-ID") userId: String,
         @ModelAttribute updateRequest: ChatUpdateRequest
     ): ResponseEntity<Chat> {
         val updatedChat = chatService.updateChat(chatId, userId, updateRequest)
