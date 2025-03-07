@@ -30,6 +30,6 @@ class ParticipantService(private val eventsService: EventsService, val chatRepos
 
     fun inviteParticipant(inviteParticipantRequest: InviteParticipantRequest, chatId: String): String {
         val notification = Notification(text = inviteParticipantRequest.invitedId, type = Notification.Type.INVITE)
-        return eventsService.saveEvent(notification, inviteParticipantRequest.inviterId, chatId)
+        return "" //eventsService.saveEvent(notification, inviteParticipantRequest.inviterId, chatId)
     }
 }

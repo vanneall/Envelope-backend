@@ -20,11 +20,11 @@ repositories {
 
 dependencies {
 
-	// Websocket & STOMP
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-	implementation 'org.springframework.boot:spring-boot-starter-messaging'
-	implementation 'org.springframework.messaging:spring-messaging'
-
+//	// Websocket & STOMP
+//	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+//	implementation 'org.springframework.boot:spring-boot-starter-messaging'
+//	implementation 'org.springframework.messaging:spring-messaging'
+//
 	// Webflux
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'io.projectreactor.kotlin:reactor-kotlin-extensions'
