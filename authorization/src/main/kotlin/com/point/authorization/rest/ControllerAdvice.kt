@@ -15,7 +15,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(InvalidUserRegistrationCredentials::class)
     fun handleRuntimeException(ex: InvalidUserRegistrationCredentials): ResponseEntity<ExceptionResponse> {
         val response = ExceptionResponse(ex.message)
-        return ResponseEntity(response, HttpStatus.BAD_REQUEST)
+        return ResponseEntity(response, HttpStatus.FORBIDDEN)
     }
 
     @ExceptionHandler(InvalidUserAuthorizationCredentials::class)

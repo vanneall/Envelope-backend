@@ -18,8 +18,8 @@ class AuthorizationService(private val userRepository: UserRepository, private v
 
     fun login(userAuthorizationRequest: UserAuthorizationRequest): Token {
         val (username, password) = userAuthorizationRequest
-        val userByUsername = userRepository.findByUsername(username) ?: throw InvalidUserRegistrationCredentials("Access denied")
-        if (userByUsername.password != PasswordHasher.hash(password)) throw InvalidUserRegistrationCredentials("Access denied")
+        val userByUsername = userRepository.findByUsername(username) ?: throw InvalidUserRegistrationCredentials("Invalid login or password")
+        if (userByUsername.password != PasswordHasher.hash(password)) throw InvalidUserRegistrationCredentials("Invalid login or password")
 
         return tokenFactory.create(username)
     }
