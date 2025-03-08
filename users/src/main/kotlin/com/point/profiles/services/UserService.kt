@@ -1,6 +1,7 @@
 package com.point.profiles.services
 
 import com.point.profiles.data.User
+import com.point.profiles.data.UserInfoShort
 import com.point.profiles.errors.exceptions.PhotoUploadException
 import com.point.profiles.errors.exceptions.UserNotFoundException
 import com.point.profiles.repository.UserRepository
@@ -9,6 +10,7 @@ import com.point.profiles.rest.requests.UpdateUserRequest
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.util.*
+import kotlin.collections.List
 
 @Service
 class UserService(private val photoService: PhotoService, private val userRepository: UserRepository) {
@@ -38,6 +40,14 @@ class UserService(private val photoService: PhotoService, private val userReposi
         return userRepository.findById(id).orElseThrow {
             UserNotFoundException(id)
         }
+    }
+
+    fun getUsersByName(name: String): List<UserInfoShort> {
+        return userRepository.findByNameContaining(name).map { UserInfoShort(
+            it.id,
+            it.name,
+            it.photos.firstOrNull()
+        ) }
     }
 
     fun updateUser(id: String, updateRequest: UpdateUserRequest): User {

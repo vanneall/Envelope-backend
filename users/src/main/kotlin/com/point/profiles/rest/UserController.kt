@@ -2,6 +2,7 @@ package com.point.profiles.rest
 
 
 import com.point.profiles.data.User
+import com.point.profiles.data.UserInfoShort
 import com.point.profiles.rest.requests.RegisterRequest
 import com.point.profiles.rest.requests.UpdateUserRequest
 import com.point.profiles.services.UserService
@@ -13,6 +14,11 @@ import java.util.*
 class UserController(
     private val userService: UserService
 ) {
+
+    @GetMapping
+    fun getUsers(@RequestParam(value = "name", defaultValue = "") name: String): List<UserInfoShort> {
+        return userService.getUsersByName(name)
+    }
 
     @PostMapping
     fun registerUser(@ModelAttribute request: RegisterRequest): User = userService.registerUser(request)
