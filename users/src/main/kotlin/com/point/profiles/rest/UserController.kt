@@ -5,6 +5,7 @@ import com.point.profiles.data.User
 import com.point.profiles.data.UserInfoShort
 import com.point.profiles.rest.requests.RegisterRequest
 import com.point.profiles.rest.requests.UpdateUserRequest
+import com.point.profiles.rest.requests.UserId
 import com.point.profiles.services.UserService
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -28,34 +29,42 @@ class UserController(
         return userService.getUserById(id)
     }
 
-    @PutMapping("/{id}")
-    fun updateUser(@PathVariable id: String, @ModelAttribute updateRequest: UpdateUserRequest): User {
+    @PutMapping
+    fun updateUser(@RequestHeader("X-User-ID") id: String, @ModelAttribute updateRequest: UpdateUserRequest): User {
         return userService.updateUser(id, updateRequest)
     }
 
-    @PutMapping("/{id}/last-seen")
-    fun updateLastSeen(@PathVariable id: String) {
+    @PutMapping("/last-seen")
+    fun updateLastSeen(@RequestHeader("X-User-ID") id: String) {
         userService.updateLastSeen(id)
     }
 
-    @PostMapping("/{id}/contacts/{contactId}")
-    fun addContact(@PathVariable id: String, @PathVariable contactId: String) {
-        userService.addContact(id, contactId)
+    @PostMapping("/contacts")
+    fun addContact(@RequestHeader("X-User-ID") id: String, @RequestBody contactId: UserId) {
+        userService.addContact(id, contactId.userId)
     }
 
-    @DeleteMapping("/{id}/contacts/{contactId}")
-    fun removeContact(@PathVariable id: String, @PathVariable contactId: String) {
-        userService.removeContact(id, contactId)
+    @DeleteMapping("/contacts")
+    fun removeContact(@RequestHeader("X-User-ID") id: String, @RequestBody contactId: UserId) {
+        userService.removeContact(id, contactId.userId)
     }
 
-    @PostMapping("/{id}/block/{blockedId}")
-    fun blockUser(@PathVariable id: String, @PathVariable blockedId: String) {
-        userService.blockUser(id, blockedId)
+    @GetMapping("/contacts")
+    fun getUserFriendsByName(
+        @RequestParam(value = "name", defaultValue = "") name: String,
+        @RequestHeader("X-User-ID") userId: String,
+    ): List<UserInfoShort> {
+        return userService.getUserFriendsByName(userId, name)
     }
 
-    @DeleteMapping("/{id}/block/{blockedId}")
-    fun unblockUser(@PathVariable id: String, @PathVariable blockedId: String) {
-        userService.unblockUser(id, blockedId)
+    @PostMapping("/blocked")
+    fun blockUser(@RequestHeader("X-User-ID") id: String, @RequestBody contactId: UserId) {
+        userService.blockUser(id, contactId.userId)
+    }
+
+    @DeleteMapping("/blocked")
+    fun unblockUser(@PathVariable id: String, @RequestBody contactId: UserId) {
+        userService.unblockUser(id, contactId.userId)
     }
 }
 

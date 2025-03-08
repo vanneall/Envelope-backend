@@ -43,11 +43,24 @@ class UserService(private val photoService: PhotoService, private val userReposi
     }
 
     fun getUsersByName(name: String): List<UserInfoShort> {
-        return userRepository.findByNameContaining(name).map { UserInfoShort(
-            it.id,
-            it.name,
-            it.photos.firstOrNull()
-        ) }
+        return userRepository.findByNameContaining(name).map {
+            UserInfoShort(
+                it.id,
+                it.name,
+                it.photos.firstOrNull()
+            )
+        }
+    }
+
+    fun getUserFriendsByName(id: String, name: String): List<UserInfoShort> {
+        return getUserById(id).friends.filter { it.contains(name) }.map {
+            val friend = getUserById(it)
+            UserInfoShort(
+                friend.id,
+                friend.name,
+                friend.photos.firstOrNull()
+            )
+        }
     }
 
     fun updateUser(id: String, updateRequest: UpdateUserRequest): User {
@@ -80,6 +93,10 @@ class UserService(private val photoService: PhotoService, private val userReposi
         if (contactId !in user.friends) {
             user.friends.add(contactId)
             userRepository.save(user)
+
+            val otherUser = getUserById(contactId)
+            otherUser.friends.add(userId)
+            userRepository.save(otherUser)
         }
     }
 
@@ -88,6 +105,10 @@ class UserService(private val photoService: PhotoService, private val userReposi
         if (contactId in user.friends) {
             user.friends.remove(contactId)
             userRepository.save(user)
+
+            val otherUser = getUserById(contactId)
+            otherUser.friends.remove(userId)
+            userRepository.save(otherUser)
         }
     }
 
@@ -96,6 +117,10 @@ class UserService(private val photoService: PhotoService, private val userReposi
         if (blockedId !in user.blockedUsers) {
             user.blockedUsers.add(blockedId)
             userRepository.save(user)
+
+            val otherUser = getUserById(blockedId)
+            otherUser.blockedUsers.add(userId)
+            userRepository.save(otherUser)
         }
     }
 
@@ -104,6 +129,10 @@ class UserService(private val photoService: PhotoService, private val userReposi
         if (blockedId in user.blockedUsers) {
             user.blockedUsers.remove(blockedId)
             userRepository.save(user)
+
+            val otherUser = getUserById(blockedId)
+            otherUser.blockedUsers.remove(userId)
+            userRepository.save(otherUser)
         }
     }
 }
