@@ -14,11 +14,16 @@ import com.point.authorization.utils.UserValidator
 import org.springframework.stereotype.Service
 
 @Service
-class AuthorizationService(private val userRepository: UserRepository, private val tokenFactory: TokenFactory) {
+class AuthorizationService(
+    private val userService: UserService,
+    private val userRepository: UserRepository,
+    private val tokenFactory: TokenFactory
+) {
 
     fun login(userAuthorizationRequest: UserAuthorizationRequest): Token {
         val (username, password) = userAuthorizationRequest
-        val userByUsername = userRepository.findByUsername(username) ?: throw InvalidUserRegistrationCredentials("Invalid login or password")
+        val userByUsername = userRepository.findByUsername(username)
+            ?: throw InvalidUserRegistrationCredentials("Invalid login or password")
         if (userByUsername.password != PasswordHasher.hash(password)) throw InvalidUserRegistrationCredentials("Invalid login or password")
 
         return tokenFactory.create(username)
@@ -27,6 +32,7 @@ class AuthorizationService(private val userRepository: UserRepository, private v
     fun register(userRegistration: UserRegistrationRequest): User {
         UserValidator.validate(userRegistration)
         val user = userRegistration.toUser()
+        userService.createUser(user)
         userRepository.save(user.toEntity())
         return user
     }

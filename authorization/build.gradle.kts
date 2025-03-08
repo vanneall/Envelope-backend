@@ -20,6 +20,12 @@ repositories {
 }
 
 dependencies {
+
+    // Webflux
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
     // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-web")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
