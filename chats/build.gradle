@@ -1,4 +1,5 @@
 plugins {
+	id 'java'
 	id 'org.jetbrains.kotlin.jvm' version '1.9.25'
 	id 'org.jetbrains.kotlin.plugin.spring' version '1.9.25'
 	id 'org.springframework.boot' version '3.4.2'
@@ -20,11 +21,12 @@ repositories {
 
 dependencies {
 
-//	// Websocket & STOMP
-//	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-//	implementation 'org.springframework.boot:spring-boot-starter-messaging'
-//	implementation 'org.springframework.messaging:spring-messaging'
-//
+	// Websocket & STOMP
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+	// JWT
+	implementation 'com.nimbusds:nimbus-jose-jwt:10.0.1'
+
 	// Webflux
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'io.projectreactor.kotlin:reactor-kotlin-extensions'
