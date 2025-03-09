@@ -39,14 +39,14 @@ fun Chat.removeFreezeParticipant(uuid: String) {
     freezeUsers.remove(uuid)
 }
 
-fun CreateChatRequest.toChat(photos: MutableList<Long>) = Chat(
+fun CreateChatRequest.toChat(ownerId: String, photos: MutableList<Long>) = Chat(
     name = name,
     description = description,
     photos = photos,
-    activeUserAuthorities = participants
+    activeUserAuthorities = setOf(participantId, ownerId)
         .associateBy({ it }, { UserAuthorities(isAdmin = it == ownerId) })
         .toMutableMap(),
-    users = participants.toMutableSet(),
+    users = mutableSetOf(participantId, ownerId),
 )
 
 fun Chat.update(newChat: ChatUpdateRequest, photoId: Long? = null) {

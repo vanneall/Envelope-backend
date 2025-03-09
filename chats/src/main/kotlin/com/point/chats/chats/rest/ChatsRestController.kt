@@ -29,8 +29,10 @@ class ChatsRestController(private val chatService: ChatService) {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun createChat(@ModelAttribute request: CreateChatRequest): ChatCreatedResponse =
-        ChatCreatedResponse(chatService.createChat(request))
+    fun createChat(
+        @RequestHeader("X-User-ID") userId: String,
+        @ModelAttribute request: CreateChatRequest
+    ): ChatCreatedResponse = ChatCreatedResponse(chatService.createChat(userId, request))
 
     @PatchMapping("/{chatId}")
     fun updateChat(

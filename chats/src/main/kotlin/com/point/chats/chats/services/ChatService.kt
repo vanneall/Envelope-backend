@@ -29,11 +29,11 @@ class ChatService(private val photoService: PhotoService, private val chatReposi
     fun getChat(chatId: String): Chat = chatRepository.findById(chatId)
         .orElseThrow { throw ChatNotFoundException(chatId) }
 
-    fun createChat(request: CreateChatRequest): String {
+    fun createChat(ownerId: String, request: CreateChatRequest): String {
         val photoId = request.photo?.let {
             mutableListOf(photoService.uploadPhoto(it).id)
         } ?: mutableListOf()
-        return requireNotNull(chatRepository.save(request.toChat(photoId)).id)
+        return requireNotNull(chatRepository.save(request.toChat(ownerId, photoId)).id)
     }
 
     fun updateChat(chatId: String, userId: String, updateRequest: ChatUpdateRequest): Chat {
