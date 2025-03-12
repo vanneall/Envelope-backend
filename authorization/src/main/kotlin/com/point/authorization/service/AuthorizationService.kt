@@ -12,6 +12,7 @@ import com.point.authorization.utils.InvalidUserRegistrationCredentials
 import com.point.authorization.utils.PasswordHasher
 import com.point.authorization.utils.UserValidator
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 
 @Service
 class AuthorizationService(
@@ -29,11 +30,22 @@ class AuthorizationService(
         return tokenFactory.create(username)
     }
 
-    fun register(userRegistration: UserRegistrationRequest): User {
+    fun register(userRegistration: UserRegistrationRequest, photo: MultipartFile?): User {
         UserValidator.validate(userRegistration)
         val user = userRegistration.toUser()
-        userService.createUser(user)
-        userRepository.save(user.toEntity())
+        try {
+            userService.createUser(user, photo)
+        } catch (ex: Exception) {
+            throw InvalidUserRegistrationCredentials(ex.message)
+        }
+
+        try {
+            userRepository.save(user.toEntity())
+        } catch (ex: Exception) {
+            userService.deleteUser(user)
+            throw InvalidUserRegistrationCredentials(ex.message)
+        }
+
         return user
     }
 }

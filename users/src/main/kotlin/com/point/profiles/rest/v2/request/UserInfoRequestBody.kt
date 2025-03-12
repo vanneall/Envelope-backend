@@ -9,9 +9,9 @@ data class UserInfoRequestBody(
     @JsonProperty("name")
     val name: String,
     @JsonProperty("status")
-    val status: String,
+    val status: String? = null,
     @JsonProperty("about_user")
-    val aboutUser: String,
+    val aboutUser: String? = null,
     @JsonProperty("birth_date")
     val birthDate: LocalDate,
 )

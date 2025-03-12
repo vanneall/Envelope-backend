@@ -7,9 +7,8 @@ import java.util.*
 @Entity
 @Table(name = "users")
 data class UserEntity(
-    @Id
-    val id: UUID,
 
+    @Id
     @Column(nullable = false, unique = true)
     val username: String,
 
@@ -24,10 +23,9 @@ data class UserEntity(
 )
 
 fun User.toEntity(): UserEntity = UserEntity(
-    id = id ?: UUID.randomUUID(),
     username = username,
-    email = email,
-    phoneNumber = phoneNumber,
+    email = null,
+    phoneNumber = null,
     password = PasswordHasher.hash(password),
 )
 

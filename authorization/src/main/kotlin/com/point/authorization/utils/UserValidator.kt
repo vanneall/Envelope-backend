@@ -9,8 +9,8 @@ object UserValidator {
         when {
             !user.username.isValidUserName() -> throw InvalidUserRegistrationCredentials("Username is invalid")
             !user.password.isValidPassword() -> throw  InvalidUserRegistrationCredentials("Password is invalid")
-            !user.telephone.isValidPhoneNumberOrEmpty() -> throw  InvalidUserRegistrationCredentials("Phone number is invalid")
-            !user.email.isValidEmailOrEmpty() -> throw  InvalidUserRegistrationCredentials("Email is invalid")
+//            !user.telephone.isValidPhoneNumberOrEmpty() -> throw  InvalidUserRegistrationCredentials("Phone number is invalid")
+//            !user.email.isValidEmailOrEmpty() -> throw  InvalidUserRegistrationCredentials("Email is invalid")
         }
     }
 }
