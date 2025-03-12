@@ -50,7 +50,7 @@ fun UserEntity.toUserDetailedInfo() = UserProfileDetailedResponse(
     requests = receivedFriendRequests.map {
         UserFriendRequest(
             id = requireNotNull(it.id),
-            userId = it.senderId
+            userId = it.sender.username
         )
     }
 )

@@ -206,13 +206,13 @@ class UserController(
     @GetMapping("/requests", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getFriendRequests(
         @RequestHeader(USER_ID_HEADER) userId: String,
-        @RequestParam(required = false, defaultValue = "") name: String,
+        @RequestParam(required = false, defaultValue = "true") incoming: Boolean,
         @RequestParam(defaultValue = "35") limit: Int,
         @RequestParam(defaultValue = "0") offset: Int
     ): ResponseEntity<List<OtherUserResponse>> {
         val friendRequests = userCommunicationService.getFriendRequests(
             username = userId,
-            name = name,
+            incoming = incoming,
             limit = limit,
             offset = offset,
         )

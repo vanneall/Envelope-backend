@@ -33,9 +33,20 @@ class UserCommunicationService(private val userRepository: UserRepository) {
             offset = offset,
         ).map { it.toOtherUserResponse() }
 
+    fun getFriendRequests(username: String, incoming: Boolean, limit: Int, offset: Int): List<OtherUserResponse> = if (incoming) {
+        getIncomingFriendRequests(username, limit, offset)
+    } else {
+        getOutgoingFriendRequests(username, limit, offset)
+    }
+
     @Transactional
-    fun getFriendRequests(username: String, name: String?, limit: Int, offset: Int): List<OtherUserResponse> =
-        userRepository.findFriendRequestsWithPagination(username, limit, offset)
+    protected fun getIncomingFriendRequests(username: String, limit: Int, offset: Int): List<OtherUserResponse> =
+        userRepository.findIncomingRequests(username, limit, offset)
+            .map { it.toOtherUserResponse() }
+
+    @Transactional
+    protected fun getOutgoingFriendRequests(username: String, limit: Int, offset: Int): List<OtherUserResponse> =
+        userRepository.findOutgoingRequests(username, limit, offset)
             .map { it.toOtherUserResponse() }
 
     @Transactional
@@ -67,32 +78,27 @@ class UserCommunicationService(private val userRepository: UserRepository) {
         val updatedUser = user.copy(blockedUsers = user.blockedUsers - blockedUser)
         userRepository.save(updatedUser)
     }
-
     @Transactional
     fun sendFriendRequest(senderId: String, request: FriendRequest) {
         val sender = findUserByUsername(senderId)
         val receiver = findUserByUsername(request.otherId)
 
-        if (receiver in sender.friends) {
-            throw UserException(ErrorCodes.USER_ALREADY_FRIEND)
-        }
-
-        if (receiver in sender.blockedUsers || sender in receiver.blockedUsers) {
-            throw UserException(ErrorCodes.USER_BLOCKED)
-        }
-
-        if (sender.sentFriendRequests.any { it.receiverId == receiver.username }) {
+        if (sender.sentFriendRequests.any { it.receiver.username == receiver.username }) {
             throw UserException(ErrorCodes.REQUEST_ALREADY_SENT)
         }
 
         val newRequest = UserEntity.FriendRequestEntity(
-            senderId = sender.username,
-            receiverId = receiver.username
+            sender = sender,
+            receiver = receiver
         )
 
-        userRepository.save(sender.copy(sentFriendRequests = sender.sentFriendRequests + newRequest))
-        userRepository.save(receiver.copy(receivedFriendRequests = receiver.receivedFriendRequests + newRequest))
+        val updatedSender = sender.copy(
+            sentFriendRequests = sender.sentFriendRequests + newRequest
+        )
+
+        userRepository.save(updatedSender)
     }
+
 
     @Transactional
     fun approveFriendRequest(receiverId: String, request: FriendRequest) {
@@ -114,7 +120,7 @@ class UserCommunicationService(private val userRepository: UserRepository) {
     fun rejectFriendRequest(receiverId: String, request: FriendRequest) {
         val receiver = findUserByUsername(receiverId)
 
-        val friendRequest = receiver.receivedFriendRequests.find { it.senderId == request.otherId }
+        val friendRequest = receiver.receivedFriendRequests.find { it.sender.username == request.otherId }
             ?: throw UserException(ErrorCodes.REQUEST_NOT_FOUND)
 
         userRepository.save(receiver.copy(receivedFriendRequests = receiver.receivedFriendRequests - friendRequest))

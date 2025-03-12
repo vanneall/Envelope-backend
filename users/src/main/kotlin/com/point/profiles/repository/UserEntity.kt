@@ -3,10 +3,10 @@ package com.point.profiles.repository
 import jakarta.persistence.*
 import java.time.LocalDate
 import java.time.LocalDateTime
-
 @Entity
 @Table(name = "env_users")
 data class UserEntity(
+
     @Id
     @Column(nullable = false, unique = true)
     val username: String,
@@ -47,25 +47,34 @@ data class UserEntity(
     )
     val blockedUsers: List<UserEntity> = emptyList(),
 
-    @OneToMany(mappedBy = "receiverId", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
-    val receivedFriendRequests: List<FriendRequestEntity> = emptyList(),
+    @OneToMany(mappedBy = "sender", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
+    val sentFriendRequests: List<FriendRequestEntity> = emptyList(),
 
-    @OneToMany(mappedBy = "senderId", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
-    val sentFriendRequests: List<FriendRequestEntity> = emptyList()
+    @OneToMany(mappedBy = "receiver", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
+    val receivedFriendRequests: List<FriendRequestEntity> = emptyList()
 ) {
+
     @Entity
-    @Table(name = "friend_requests")
+    @Table(
+        name = "friend_requests",
+        uniqueConstraints = [
+            UniqueConstraint(columnNames = ["sender_id", "receiver_id"])
+        ]
+    )
     data class FriendRequestEntity(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         val id: Long? = null,
 
-        @Column(name = "sender_id", nullable = false)
-        val senderId: String,
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "sender_id", nullable = false)
+        val sender: UserEntity,
 
-        @Column(name = "receiver_id", nullable = false)
-        val receiverId: String
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "receiver_id", nullable = false)
+        val receiver: UserEntity
     )
 }
+
 
 
