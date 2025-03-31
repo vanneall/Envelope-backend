@@ -33,7 +33,7 @@ class AuthorizationController(private val authorizationService: AuthorizationSer
         val token = login(UserAuthorizationRequest(registeredUser.username, registeredUser.password))
 
         val responseHeaders = HttpHeaders().apply {
-            location = URI.create("/users/api/v2/${registeredUser.username}")
+            location = URI.create("/users/api-v2/${registeredUser.username}")
             add("Content-Type", "application/json")
         }
 

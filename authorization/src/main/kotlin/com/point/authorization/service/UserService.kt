@@ -23,7 +23,7 @@ class UserService(webClientBuilder: WebClient.Builder) {
         }
 
         return webClient.post()
-            .uri("/api/v2")
+            .uri("/api-v2")
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .bodyValue(bodyBuilder.build())
             .retrieve()
@@ -32,7 +32,7 @@ class UserService(webClientBuilder: WebClient.Builder) {
     }
 
     fun deleteUser(user: User) =webClient.delete()
-            .uri("/api/v2")
+            .uri("/api-v2")
             .header("X-User-ID", user.username)
             .retrieve()
             .bodyToMono(ResultInfo::class.java)

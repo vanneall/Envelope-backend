@@ -9,15 +9,21 @@ import org.springframework.transaction.annotation.Transactional
 
 
 @Transactional
-fun UserEntity.toUserShortInfo() = UserInfoShortResponse(
-    username = username,
-    name = name,
-    lastSeen = lastSeen,
-    status = status,
-    about = about,
-    birthDate = birthDate,
-    photos = photos
-)
+fun UserEntity.toUserShortInfo(userId: String): UserInfoShortResponse {
+    val inContacts = friends.any { it.username == userId }
+    val inSentRequests = !inContacts && receivedFriendRequests.any { it.sender.username == userId }
+    return UserInfoShortResponse(
+        username = username,
+        name = name,
+        lastSeen = lastSeen,
+        status = status,
+        about = about,
+        birthDate = birthDate,
+        photos = photos,
+        inContacts = inContacts,
+        inSentRequests = inSentRequests,
+    )
+}
 
 @Transactional
 fun UserEntity.toUserDetailedInfo() = UserProfileDetailedResponse(
@@ -35,6 +41,8 @@ fun UserEntity.toUserDetailedInfo() = UserProfileDetailedResponse(
             name = it.name,
             status = it.status,
             lastPhoto = it.photos.firstOrNull(),
+            inContacts = true,
+            inSentRequests = false,
         )
     },
     blockedCount = blockedUsers.size,
@@ -44,6 +52,8 @@ fun UserEntity.toUserDetailedInfo() = UserProfileDetailedResponse(
             name = it.name,
             status = it.status,
             lastPhoto = it.photos.firstOrNull(),
+            inContacts = false,
+            inSentRequests = false,
         )
     },
     friendRequestCount = receivedFriendRequests.size,
@@ -56,9 +66,15 @@ fun UserEntity.toUserDetailedInfo() = UserProfileDetailedResponse(
 )
 
 @Transactional
-fun UserEntity.toOtherUserResponse() = OtherUserResponse(
-    username = username,
-    name = name,
-    status = status,
-    lastPhoto = photos.firstOrNull(),
-)
+fun UserEntity.toOtherUserResponse(userId: String): OtherUserResponse {
+    val inContacts = friends.any { it.username == userId }
+    val inSentRequests = !inContacts && receivedFriendRequests.any { it.sender.username == userId }
+    return OtherUserResponse(
+        username = username,
+        name = name,
+        status = status,
+        lastPhoto = photos.firstOrNull(),
+        inContacts = inContacts,
+        inSentRequests = inSentRequests,
+    )
+}

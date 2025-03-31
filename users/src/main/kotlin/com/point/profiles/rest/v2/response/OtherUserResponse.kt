@@ -11,4 +11,8 @@ data class OtherUserResponse(
     val status: String?,
     @JsonProperty("last_photo")
     val lastPhoto: Long?,
+    @JsonProperty("in_contacts")
+    val inContacts: Boolean,
+    @JsonProperty("in_sent_requests")
+    val inSentRequests: Boolean,
 )

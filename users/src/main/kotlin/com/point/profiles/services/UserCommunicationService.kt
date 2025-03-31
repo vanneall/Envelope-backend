@@ -22,7 +22,19 @@ class UserCommunicationService(private val userRepository: UserRepository) {
             name = name,
             limit = limit,
             offset = offset,
-        ).map { it.toOtherUserResponse() }
+        ).map { it.toOtherUserResponse(username) }
+
+    @Transactional
+    fun deleteUserFriend(userId: String, deletedUserId: String) {
+        val user = findUserByUsername(userId)
+        val deletedUser = findUserByUsername(deletedUserId)
+        userRepository.save(
+            user.copy(friends = user.friends.filter { it.username != deletedUserId })
+        )
+        userRepository.save(
+            deletedUser.copy(friends = deletedUser.friends.filter { it.username != userId })
+        )
+    }
 
     @Transactional
     fun getUserBlocked(username: String, name: String?, limit: Int, offset: Int): List<OtherUserResponse> =
@@ -31,23 +43,24 @@ class UserCommunicationService(private val userRepository: UserRepository) {
             name = name,
             limit = limit,
             offset = offset,
-        ).map { it.toOtherUserResponse() }
+        ).map { it.toOtherUserResponse(username) }
 
-    fun getFriendRequests(username: String, incoming: Boolean, limit: Int, offset: Int): List<OtherUserResponse> = if (incoming) {
-        getIncomingFriendRequests(username, limit, offset)
-    } else {
-        getOutgoingFriendRequests(username, limit, offset)
-    }
+    fun getFriendRequests(username: String, incoming: Boolean, limit: Int, offset: Int): List<OtherUserResponse> =
+        if (incoming) {
+            getIncomingFriendRequests(username, limit, offset)
+        } else {
+            getOutgoingFriendRequests(username, limit, offset)
+        }
 
     @Transactional
     protected fun getIncomingFriendRequests(username: String, limit: Int, offset: Int): List<OtherUserResponse> =
         userRepository.findIncomingRequests(username, limit, offset)
-            .map { it.toOtherUserResponse() }
+            .map { it.toOtherUserResponse(username) }
 
     @Transactional
     protected fun getOutgoingFriendRequests(username: String, limit: Int, offset: Int): List<OtherUserResponse> =
         userRepository.findOutgoingRequests(username, limit, offset)
-            .map { it.toOtherUserResponse() }
+            .map { it.toOtherUserResponse(username) }
 
     @Transactional
     fun blockUser(userId: String, request: BlockedUserRequest) {
@@ -62,7 +75,10 @@ class UserCommunicationService(private val userRepository: UserRepository) {
             throw UserException(ErrorCodes.INVALID_BLOCK_MYSELF)
         }
 
-        val updatedUser = user.copy(blockedUsers = user.blockedUsers + blockedUser)
+        val updatedUser = user.copy(
+            blockedUsers = user.blockedUsers + blockedUser,
+            friends = user.friends.filter { it.username != blockedUser.username },
+        )
         userRepository.save(updatedUser)
     }
 
@@ -78,10 +94,15 @@ class UserCommunicationService(private val userRepository: UserRepository) {
         val updatedUser = user.copy(blockedUsers = user.blockedUsers - blockedUser)
         userRepository.save(updatedUser)
     }
+
     @Transactional
     fun sendFriendRequest(senderId: String, request: FriendRequest) {
         val sender = findUserByUsername(senderId)
         val receiver = findUserByUsername(request.otherId)
+
+        if (sender in receiver.friends) {
+            throw UserException(ErrorCodes.USER_ALREADY_FRIEND)
+        }
 
         if (sender.sentFriendRequests.any { it.receiver.username == receiver.username }) {
             throw UserException(ErrorCodes.REQUEST_ALREADY_SENT)
@@ -109,8 +130,14 @@ class UserCommunicationService(private val userRepository: UserRepository) {
             throw UserException(ErrorCodes.USER_ALREADY_FRIEND)
         }
 
-        val updatedReceiver = receiver.copy(friends = receiver.friends + sender)
-        val updatedSender = sender.copy(friends = sender.friends + receiver)
+        val updatedReceiver = receiver.copy(
+            friends = receiver.friends + sender,
+            receivedFriendRequests = receiver.receivedFriendRequests.filter { it.sender.username != sender.username },
+        )
+        val updatedSender = sender.copy(
+            friends = sender.friends + receiver,
+            sentFriendRequests = sender.sentFriendRequests.filter { it.receiver.username != receiver.username },
+        )
 
         userRepository.save(updatedReceiver)
         userRepository.save(updatedSender)

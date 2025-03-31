@@ -19,4 +19,8 @@ data class UserInfoShortResponse(
     val birthDate: LocalDate,
     @JsonProperty("photos")
     val photos: List<Long>,
+    @JsonProperty("in_contacts")
+    val inContacts: Boolean,
+    @JsonProperty("in_sent_requests")
+    val inSentRequests: Boolean,
 )

@@ -6,6 +6,7 @@ import com.point.profiles.repository.UserEntity
 import com.point.profiles.repository.UserRepository
 import com.point.profiles.rest.v2.request.UserInfoRequestBody
 import com.point.profiles.rest.v2.request.UserProfileUpdateRequest
+import com.point.profiles.rest.v2.response.OtherUserResponse
 import com.point.profiles.rest.v2.response.UserInfoShortResponse
 import com.point.profiles.rest.v2.response.UserProfileDetailedResponse
 import org.springframework.data.domain.PageRequest
@@ -20,13 +21,15 @@ class UserCrudService(private val userRepository: UserRepository, private val ph
     private fun findUserByUsername(username: String): UserEntity =
         userRepository.findById(username).orElseThrow { UserException(ErrorCodes.USER_NOT_FOUND) }
 
-    fun getUserShortInfo(username: String): UserInfoShortResponse = findUserByUsername(username).toUserShortInfo()
+    fun getUserShortInfo(username: String, userId: String): UserInfoShortResponse =
+        findUserByUsername(username).toUserShortInfo(userId)
 
-    fun getUsersShortInfoByName(name: String, limit: Int, offset: Int): List<UserInfoShortResponse> =
+    fun getUsersShortInfoByName(userId: String, name: String, limit: Int, offset: Int): List<OtherUserResponse> =
         userRepository.findByNameContainingIgnoreCase(name, PageRequest.of(offset, limit))
             .content
+            .filter { it.username != userId }
             .map { user ->
-                user.toUserShortInfo()
+                user.toOtherUserResponse(userId)
             }
 
     fun getUserDetailedInfo(username: String): UserProfileDetailedResponse =

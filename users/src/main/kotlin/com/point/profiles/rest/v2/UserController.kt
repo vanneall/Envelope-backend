@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.net.URI
 
 @RestController
-@RequestMapping("/users/api/v2")
+@RequestMapping("/users/api-v2")
 class UserController(
     private val userCrudService: UserCrudService,
     private val userCommunicationService: UserCommunicationService,
@@ -24,11 +24,20 @@ class UserController(
 
     @GetMapping("/all", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getUserShortInfo(
+        @RequestHeader(USER_ID_HEADER) userId: String,
         @RequestParam(required = false, defaultValue = "") name: String,
         @RequestParam(defaultValue = "35") limit: Int,
         @RequestParam(defaultValue = "0") offset: Int
-    ): ResponseEntity<List<UserInfoShortResponse>> {
-        val userInfo = userCrudService.getUsersShortInfoByName(name, limit, offset)
+    ): ResponseEntity<List<OtherUserResponse>> {
+        val usersInfo = userCrudService.getUsersShortInfoByName(userId, name, limit, offset)
+        val userContacts = userCommunicationService.getUserFriends(
+            username = userId,
+            name = name,
+            limit = limit,
+            offset = offset,
+        )
+
+        val concatUsers = (userContacts.toSet() + usersInfo.toSet()).take(limit)
 
         val responseHeaders = HttpHeaders().apply {
             add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -36,14 +45,15 @@ class UserController(
 
         return ResponseEntity.status(HttpStatus.OK)
             .headers(responseHeaders)
-            .body(userInfo)
+            .body(concatUsers)
     }
 
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getUserShortInfo(
+        @RequestHeader(USER_ID_HEADER) userId: String,
         @PathVariable("id") id: String
     ): ResponseEntity<UserInfoShortResponse> {
-        val userInfo = userCrudService.getUserShortInfo(id)
+        val userInfo = userCrudService.getUserShortInfo(id, userId)
 
         val responseHeaders = HttpHeaders().apply {
             add(USER_ID_HEADER, id)
@@ -79,7 +89,7 @@ class UserController(
         val username = userCrudService.registerUser(request, photo)
 
         val responseHeaders = HttpHeaders().apply {
-            location = URI.create("/users/api/v2/$username")
+            location = URI.create("/users/api-v2/$username")
             add(USER_ID_HEADER, username)
             add("Content-Type", "application/json")
         }
@@ -145,6 +155,24 @@ class UserController(
         return ResponseEntity.ok()
             .headers(responseHeaders)
             .body(friends)
+    }
+
+    @DeleteMapping("/friends/{username}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun deleteFriend(
+        @RequestHeader(USER_ID_HEADER) userId: String,
+        @PathVariable username: String,
+    ): ResponseEntity<Unit> {
+        userCommunicationService.deleteUserFriend(
+            userId = userId,
+            deletedUserId = username,
+        )
+
+        val responseHeaders = HttpHeaders().apply {
+            add(USER_ID_HEADER, userId)
+            add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        }
+
+        return ResponseEntity.ok().headers(responseHeaders).body(Unit)
     }
 
     @GetMapping("/blocked", produces = [MediaType.APPLICATION_JSON_VALUE])
