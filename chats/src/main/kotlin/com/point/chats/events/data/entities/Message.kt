@@ -1,6 +1,7 @@
 package com.point.chats.events.data.entities
 
 import com.fasterxml.jackson.annotation.JsonTypeName
+import com.point.chats.chatsv2.data.entity.event.MessageSentEvent
 import com.point.chats.common.data.entities.Event
 import com.point.chats.events.rest.requests.CreateMessageRequest
 import org.springframework.data.annotation.TypeAlias
@@ -17,8 +18,7 @@ data class Message(
     val photos: MutableList<Long>?,
 ) : Event
 
-fun CreateMessageRequest.toMessage(photos: MutableList<Long>? = null) = Message(
+fun CreateMessageRequest.toMessageEvent(photos: MutableList<Long>? = null) = MessageSentEvent(
     senderId = senderId,
-    content = content,
-    photos = photos,
+    text = content,
 )

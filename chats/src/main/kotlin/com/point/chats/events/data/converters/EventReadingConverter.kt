@@ -1,32 +1,28 @@
 package com.point.chats.events.data.converters
 
-import com.point.chats.common.data.entities.Event
-import com.point.chats.events.data.entities.Message
-import com.point.chats.events.data.entities.Notification
+import com.point.chats.chatsv2.data.entity.event.BaseEvent
+import com.point.chats.chatsv2.data.entity.event.MessageSentEvent
 import org.bson.Document
 import org.springframework.core.convert.converter.Converter
 import org.springframework.data.convert.ReadingConverter
+import java.util.*
 
 @ReadingConverter
-class EventReadingConverter : Converter<Document, Event> {
-    override fun convert(source: Document): Event {
-        return when (source.getString("_class")) {
-            "message" -> Message(
-                senderId = source.getString("senderId"),
-                content = source.getString("content"),
-                photos = source.getList("photos", Any::class.java)
-                    ?.map { (it as Number).toLong() }
-                    ?.toMutableList()
-                    ?: mutableListOf(),
-            )
+class EventReadingConverter : Converter<Document, BaseEvent> {
 
-            "notification" -> Notification(
-                text = source.getString("text"),
-                type = Notification.Type.valueOf(source.getString("type")),
-            )
+    override fun convert(source: Document) = when (source.getString("_class")) {
+        "message" -> MessageSentEvent(
+            id = source.getString("_id"),
+            timestamp = source.get("timestamp", Date::class.java).toInstant(),
+            senderId = source.getString("senderId"),
+            text = source.getString("text"),
+            attachments = source.getList("attachments", Any::class.java)
+                ?.map { (it as Number).toLong() }
+                ?.toMutableList()
+                ?: mutableListOf(),
+        )
 
-            else -> throw IllegalArgumentException("Unknown Event type: ${source.getString("type")}")
-        }
+        else -> throw IllegalArgumentException("Unknown Event type: ${source.getString("type")}")
     }
 }
 

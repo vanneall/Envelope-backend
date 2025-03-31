@@ -1,17 +1,14 @@
 package com.point.chats.events.rest
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.point.chats.chats.services.ChatService
-import com.point.chats.events.data.entities.Message
+import com.point.chats.chatsv2.data.entity.event.MessageSentEvent
 import com.point.chats.events.rest.requests.CreateMessageRequest
 import com.point.chats.events.services.EventsService
 import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.handler.annotation.SendTo
-import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Controller
-import org.springframework.web.multipart.MultipartFile
 import java.security.Principal
 
 @Controller
@@ -25,7 +22,7 @@ class WebSocketChatController(
         @Payload messageRequest: CreateMessageRequest2,
         @DestinationVariable chatId: String,
         principal: Principal,
-    ): Message {
+    ): MessageSentEvent {
         val message = eventsService.createEvent(
             chatId,
             CreateMessageRequest(

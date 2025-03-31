@@ -1,6 +1,6 @@
 package com.point.chats.events.rest
 
-import com.point.chats.common.data.entities.Event
+import com.point.chats.chatsv2.data.entity.event.BaseEvent
 import com.point.chats.events.rest.requests.CreateMessageRequest
 import com.point.chats.events.rest.responses.MessageCreatedResponse
 import com.point.chats.events.services.EventsService
@@ -16,8 +16,8 @@ class EventRestController(private val eventsService: EventsService) {
     fun fetchEvents(
         @PathVariable chatId: String,
         @RequestParam(defaultValue = "0") offset: Int,
-        @RequestParam(defaultValue = "10") limit: Int,
-    ): List<Event> = eventsService.getChatEvents(chatId, offset, limit)
+        @RequestParam(defaultValue = "35") limit: Int,
+    ): List<BaseEvent> = eventsService.getChatEvents(chatId, offset, limit)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -31,6 +31,6 @@ class EventRestController(private val eventsService: EventsService) {
         @PathVariable messageId: String,
         @RequestHeader("X-User-ID") userId: String,
     ) {
-        eventsService.pinMessage(chatId, messageId, userId)
+//        eventsService.pinMessage(chatId, messageId, userId)
     }
 }
