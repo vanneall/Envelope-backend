@@ -27,3 +27,18 @@ data class MessageSentEvent @JsonCreator constructor(
     @JsonProperty("timestamp")
     override val timestamp: Instant = Instant.now()
 ) : BaseEvent
+
+
+@TypeAlias("deleteMessage")
+@JsonTypeName("deleteMessage")
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class DeleteMessageEvent @JsonCreator constructor(
+    @JsonProperty("messageId")
+    val messageId: String,
+
+    @JsonProperty("id")
+    override val id: String = UUID.randomUUID().toString(),
+
+    @JsonProperty("timestamp")
+    override val timestamp: Instant = Instant.now()
+) : BaseEvent

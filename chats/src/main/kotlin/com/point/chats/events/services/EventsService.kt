@@ -40,6 +40,12 @@ class EventsService(private val photoService: PhotoService, private val chatRepo
         return saveEvent(message, createMessageRequest.senderId, chatId) as MessageSentEvent
     }
 
+    fun deleteMessage(chatId: String, messageId: String) {
+        val chat = chatRepository.findById(chatId).getOrNull() ?: throw ChatNotFoundException(chatId)
+        chat.events.removeIf { it.id == messageId }
+        chatRepository.save(chat)
+    }
+
     fun saveEvent(event: BaseEvent, eventOwnerId: String, chatId: String): BaseEvent {
         val chat = chatRepository.findById(chatId).getOrNull() ?: throw ChatNotFoundException(chatId)
         chat.events.add(event)

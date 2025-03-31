@@ -1,6 +1,7 @@
 package com.point.chats.events.rest
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.point.chats.chatsv2.data.entity.event.DeleteMessageEvent
 import com.point.chats.chatsv2.data.entity.event.MessageSentEvent
 import com.point.chats.events.rest.requests.CreateMessageRequest
 import com.point.chats.events.services.EventsService
@@ -33,6 +34,20 @@ class WebSocketChatController(
         )
         return message
     }
+
+    @MessageMapping("/chat/{chatId}/deleteMessage")
+    @SendTo("/topic/chat/{chatId}")
+    fun deleteMessage(
+        @Payload deleteMessage: DeleteMessage,
+        @DestinationVariable chatId: String,
+        principal: Principal,
+    ): DeleteMessageEvent {
+        eventsService.deleteMessage(
+            chatId,
+            deleteMessage.messageId,
+        )
+        return DeleteMessageEvent(messageId = deleteMessage.messageId)
+    }
 }
 
 data class CreateMessageRequest2(
@@ -40,4 +55,9 @@ data class CreateMessageRequest2(
     val content: String,
     @JsonProperty("photos")
     val photos: MutableList<Long>? = null,
+)
+
+data class DeleteMessage(
+    @JsonProperty("message_id")
+    val messageId: String
 )

@@ -86,7 +86,7 @@ class UserController(
         @PathVariable("chatId") chatId: String
     ): ResponseEntity<MutableList<BaseEvent>> {
         val chats = chatService.getUserChat(chatId)
-//        chats.sortBy { it.timestamp }
+        chats.sortByDescending { it.timestamp }
         return ResponseEntity.ok(chats)
     }
 
