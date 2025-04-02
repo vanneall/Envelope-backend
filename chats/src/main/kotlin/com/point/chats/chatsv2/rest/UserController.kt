@@ -49,9 +49,9 @@ class UserController(
     fun createChat(
         @RequestHeader("X-User-ID") userId: String,
         @RequestBody request: CreateChatRequest,
-    ): ResponseEntity<String> {
+    ): ResponseEntity<ChatIdResponse> {
         val chatId = chatService.createChat(userId, request.participantIds, request.name)
-        return ResponseEntity.ok(chatId)
+        return ResponseEntity.ok(ChatIdResponse(chatId))
     }
 
     @DeleteMapping("/{chatId}")
@@ -109,4 +109,9 @@ data class CreateChatRequest(
     val participantIds: List<String>,
     @JsonProperty("name")
     val name: String? = null,
+)
+
+data class ChatIdResponse(
+    @JsonProperty("id")
+    val id: String,
 )

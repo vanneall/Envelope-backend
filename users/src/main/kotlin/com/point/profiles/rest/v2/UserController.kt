@@ -1,10 +1,10 @@
 package com.point.profiles.rest.v2
 
-import com.point.profiles.rest.v2.request.*
-import com.point.profiles.rest.v2.response.OtherUserResponse
-import com.point.profiles.rest.v2.response.RegisterUserResponse
-import com.point.profiles.rest.v2.response.UserInfoShortResponse
-import com.point.profiles.rest.v2.response.UserProfileDetailedResponse
+import com.point.profiles.rest.v2.request.BlockedUserRequest
+import com.point.profiles.rest.v2.request.FriendRequest
+import com.point.profiles.rest.v2.request.UserInfoRequestBody
+import com.point.profiles.rest.v2.request.UserProfileUpdateRequest
+import com.point.profiles.rest.v2.response.*
 import com.point.profiles.services.UserCommunicationService
 import com.point.profiles.services.UserCrudService
 import org.springframework.http.HttpHeaders
@@ -28,7 +28,7 @@ class UserController(
         @RequestParam(required = false, defaultValue = "") name: String,
         @RequestParam(defaultValue = "35") limit: Int,
         @RequestParam(defaultValue = "0") offset: Int
-    ): ResponseEntity<List<OtherUserResponse>> {
+    ): ResponseEntity<UsersSearchResponse> {
         val usersInfo = userCrudService.getUsersShortInfoByName(userId, name, limit, offset)
         val userContacts = userCommunicationService.getUserFriends(
             username = userId,
@@ -37,7 +37,10 @@ class UserController(
             offset = offset,
         )
 
-        val concatUsers = (userContacts.toSet() + usersInfo.toSet()).take(limit)
+        val concatUsers = UsersSearchResponse(
+            inContacts = userContacts,
+            allContacts = usersInfo,
+        )
 
         val responseHeaders = HttpHeaders().apply {
             add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
