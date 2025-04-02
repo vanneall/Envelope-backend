@@ -3,15 +3,20 @@ package com.point.chats.chatsv2.service
 import com.point.chats.chatsv2.data.entity.document.ChatDocument
 import com.point.chats.chatsv2.data.entity.document.ChatType
 import com.point.chats.chatsv2.data.entity.document.UserDocument
+import com.point.chats.chatsv2.data.entity.event.MessageSentEvent
 import com.point.chats.chatsv2.data.repository.ChatRepositoryV2
 import com.point.chats.chatsv2.data.repository.UserRepository
+import com.point.chats.common.service.ClientService
+import com.point.chats.events.services.BaseMeta
+import com.point.chats.events.services.toMessageMeta
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 
 @Service
 class ChatService2(
     private val userRepository: UserRepository,
-    private val chatRepository: ChatRepositoryV2
+    private val chatRepository: ChatRepositoryV2,
+    private val clientService: ClientService,
 ) {
 
     fun createChat(userId: String, participantIds: List<String>, name: String?): String {
@@ -74,5 +79,13 @@ class ChatService2(
         return chatRepository.findByIdInAndNameContainingIgnoreCase(userDoc.chatIds, name, pageable)
     }
 
-    fun getUserChat(chatId: String) = chatRepository.findById(chatId).get().events
+    fun getUserChat(chatId: String): List<BaseMeta> = chatRepository.findById(chatId).get().events.mapNotNull { event ->
+        when (event) {
+            is MessageSentEvent -> {
+                val info = clientService.getUserShortInfo(event.senderId)
+                event.toMessageMeta(info)
+            }
+            else -> null
+        }
+    }
 }

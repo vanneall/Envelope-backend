@@ -2,9 +2,9 @@ package com.point.chats.events.rest
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.point.chats.chatsv2.data.entity.event.DeleteMessageEvent
-import com.point.chats.chatsv2.data.entity.event.MessageSentEvent
 import com.point.chats.events.rest.requests.CreateMessageRequest
 import com.point.chats.events.services.EventsService
+import com.point.chats.events.services.MessageMeta
 import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
@@ -23,7 +23,7 @@ class WebSocketChatController(
         @Payload messageRequest: CreateMessageRequest2,
         @DestinationVariable chatId: String,
         principal: Principal,
-    ): MessageSentEvent {
+    ): MessageMeta {
         val message = eventsService.createEvent(
             chatId,
             CreateMessageRequest(

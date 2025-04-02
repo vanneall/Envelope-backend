@@ -12,20 +12,16 @@ import java.util.*
 @JsonTypeName("message")
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class MessageSentEvent @JsonCreator constructor(
-    @JsonProperty("senderId")
-    val senderId: String,
-
-    @JsonProperty("text")
-    val text: String?,
-
-    @JsonProperty("attachments")
-    val attachments: List<Long> = emptyList(),
-
     @JsonProperty("id")
     override val id: String = UUID.randomUUID().toString(),
-
     @JsonProperty("timestamp")
-    override val timestamp: Instant = Instant.now()
+    override val timestamp: Instant = Instant.now(),
+    @JsonProperty("senderId")
+    val senderId: String,
+    @JsonProperty("text")
+    val text: String?,
+    @JsonProperty("attachments")
+    val attachments: List<Long> = emptyList(),
 ) : BaseEvent
 
 

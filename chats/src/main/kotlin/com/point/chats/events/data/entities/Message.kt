@@ -18,7 +18,9 @@ data class Message(
     val photos: MutableList<Long>?,
 ) : Event
 
-fun CreateMessageRequest.toMessageEvent(photos: MutableList<Long>? = null) = MessageSentEvent(
+fun CreateMessageRequest.toMessageEvent(
+    photos: MutableList<Long>? = null,
+) = MessageSentEvent(
     senderId = senderId,
     text = content,
 )

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.point.chats.chatsv2.data.entity.document.ChatDocument
 import com.point.chats.chatsv2.data.entity.document.ChatType
 import com.point.chats.chatsv2.data.entity.document.UserDocument
-import com.point.chats.chatsv2.data.entity.event.BaseEvent
 import com.point.chats.chatsv2.data.repository.ChatRepositoryV2
 import com.point.chats.chatsv2.data.repository.UserRepository
 import com.point.chats.chatsv2.service.ChatService2
+import com.point.chats.events.services.BaseMeta
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -81,12 +81,12 @@ class UserController(
     }
 
     @GetMapping("/{chatId}")
-    fun getChaById(
+    fun getChatEventsById(
         @RequestHeader("X-User-ID") userId: String,
         @PathVariable("chatId") chatId: String
-    ): ResponseEntity<MutableList<BaseEvent>> {
+    ): ResponseEntity<List<BaseMeta>> {
         val chats = chatService.getUserChat(chatId)
-        chats.sortByDescending { it.timestamp }
+        chats.sortedByDescending { it.timestamp }
         return ResponseEntity.ok(chats)
     }
 
