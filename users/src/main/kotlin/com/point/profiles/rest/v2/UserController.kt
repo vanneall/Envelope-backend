@@ -51,6 +51,22 @@ class UserController(
             .body(concatUsers)
     }
 
+    @GetMapping("/all/lightweight", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getUsernameAndLastPhotoByIds(
+        @RequestHeader(USER_ID_HEADER) userId: String,
+        @RequestParam(required = false, defaultValue = "") ids: List<String>,
+    ): ResponseEntity<List<UserLightweightInfoResponse>> {
+        val usersInfo = userCrudService.getUserLightweightInfo(ids).map { info -> info.toResponse() }
+
+        val responseHeaders = HttpHeaders().apply {
+            add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .headers(responseHeaders)
+            .body(usersInfo)
+    }
+
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getUserShortInfo(
         @RequestHeader(USER_ID_HEADER) userId: String,

@@ -11,6 +11,7 @@ import com.point.profiles.rest.v2.response.UserInfoShortResponse
 import com.point.profiles.rest.v2.response.UserProfileDetailedResponse
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -103,4 +104,19 @@ class UserCrudService(private val userRepository: UserRepository, private val ph
 
         userRepository.save(updatedUser)
     }
+
+    @Transactional
+    fun getUserLightweightInfo(users: List<String>) = userRepository.findAllById(users).map { entity ->
+        UserLightweightInfo(
+            username = entity.username,
+            name = entity.name,
+            photoId = entity.photos.lastOrNull(),
+        )
+    }
 }
+
+data class UserLightweightInfo(
+    val username: String,
+    val name: String,
+    val photoId : Long? = null,
+)
