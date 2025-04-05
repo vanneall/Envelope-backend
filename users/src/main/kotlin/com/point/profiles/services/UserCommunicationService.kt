@@ -4,7 +4,8 @@ import com.point.profiles.exceptions.ErrorCodes
 import com.point.profiles.exceptions.UserException
 import com.point.profiles.repository.UserEntity
 import com.point.profiles.repository.UserRepository
-import com.point.profiles.rest.v2.request.*
+import com.point.profiles.rest.v2.request.BlockedUserRequest
+import com.point.profiles.rest.v2.request.FriendRequest
 import com.point.profiles.rest.v2.response.OtherUserResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,7 +17,7 @@ class UserCommunicationService(private val userRepository: UserRepository) {
         userRepository.findById(username).orElseThrow { UserException(ErrorCodes.USER_NOT_FOUND) }
 
     @Transactional
-    fun getUserFriends(username: String, name: String?, limit: Int, offset: Int): List<OtherUserResponse> =
+    fun getUserContacts(username: String, name: String?, limit: Int, offset: Int): List<OtherUserResponse> =
         userRepository.findFriendsWithPagination(
             username = username,
             name = name,

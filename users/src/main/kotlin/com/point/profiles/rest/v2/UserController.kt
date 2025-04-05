@@ -30,7 +30,7 @@ class UserController(
         @RequestParam(defaultValue = "0") offset: Int
     ): ResponseEntity<UsersSearchResponse> {
         val usersInfo = userCrudService.getUsersShortInfoByName(userId, name, limit, offset)
-        val userContacts = userCommunicationService.getUserFriends(
+        val userContacts = userCommunicationService.getUserContacts(
             username = userId,
             name = name,
             limit = limit,
@@ -152,14 +152,14 @@ class UserController(
             .build()
     }
 
-    @GetMapping("/friends", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getFriends(
+    @GetMapping("/contacts", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getUserContacts(
         @RequestHeader(USER_ID_HEADER) userId: String,
         @RequestParam(required = false, defaultValue = "") name: String,
         @RequestParam(defaultValue = "35") limit: Int,
         @RequestParam(defaultValue = "0") offset: Int
     ): ResponseEntity<List<OtherUserResponse>> {
-        val friends = userCommunicationService.getUserFriends(
+        val contacts = userCommunicationService.getUserContacts(
             username = userId,
             name = name,
             limit = limit,
@@ -173,11 +173,11 @@ class UserController(
 
         return ResponseEntity.ok()
             .headers(responseHeaders)
-            .body(friends)
+            .body(contacts)
     }
 
-    @DeleteMapping("/friends/{username}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun deleteFriend(
+    @DeleteMapping("/contacts/{username}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun deleteUserContact(
         @RequestHeader(USER_ID_HEADER) userId: String,
         @PathVariable username: String,
     ): ResponseEntity<Unit> {
