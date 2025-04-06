@@ -110,7 +110,7 @@ class UserCrudService(private val userRepository: UserRepository, private val ph
         UserLightweightInfo(
             username = entity.username,
             name = entity.name,
-            photoId = entity.photos.lastOrNull(),
+            photoId = entity.photos.firstOrNull(),
         )
     }
 }
