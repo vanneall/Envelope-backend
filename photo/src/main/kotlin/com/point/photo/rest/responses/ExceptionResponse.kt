@@ -1,4 +1,4 @@
-package com.point.authorization.data.response
+package com.point.photo.rest.responses
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

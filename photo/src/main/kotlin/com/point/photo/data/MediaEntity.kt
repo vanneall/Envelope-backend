@@ -2,8 +2,8 @@ package com.point.photo.data
 
 import jakarta.persistence.*
 
-@Entity
-data class PhotoEntity(
+@Entity(name = "media")
+data class MediaEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     val id: Long = 0,
@@ -15,7 +15,7 @@ data class PhotoEntity(
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is PhotoEntity) return false
+        if (other !is MediaEntity) return false
 
         if (id != other.id) return false
 

@@ -11,7 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @Service
 class PhotoService(webClientBuilder: WebClient.Builder) {
 
-    private val webClient = webClientBuilder.baseUrl("http://127.0.0.1:8084/photos").build()
+    private val webClient = webClientBuilder.baseUrl("http://127.0.0.1:8084/media").build()
 
     fun uploadPhoto(photo: MultipartFile): PhotoIdResponse {
         val bodyBuilder = MultipartBodyBuilder()

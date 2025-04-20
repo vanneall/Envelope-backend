@@ -19,7 +19,7 @@ spring:
         - id: photo-service
           uri: http://localhost:8084
           predicates:
-            - Path=/photos/**
+            - Path=/media/**
 
 server:
   port: 8080
