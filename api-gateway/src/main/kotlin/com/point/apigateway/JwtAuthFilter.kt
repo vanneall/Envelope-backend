@@ -28,8 +28,7 @@ class JwtUsernameFilter(
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
         val path = exchange.request.uri.path
 
-        // Не обрабатывать /auth/**
-        if (path.startsWith("/auth/")) {
+        if (path.startsWith("/auth") || path.startsWith("/media")) {
             return chain.filter(exchange)
         }
 

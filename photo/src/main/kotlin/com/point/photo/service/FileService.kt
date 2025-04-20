@@ -17,7 +17,6 @@ class FileService(private val mediaRepository: MediaRepository) {
 
     @Transactional
     fun saveFile(file: MultipartFile): Long {
-
         if (file.isEmpty) throw FileValidationException(MediaError.FILE_EMPTY)
 
         val originalFileName = file.originalFilename ?: throw FileValidationException(MediaError.FILE_NAME_MISSING)
@@ -32,6 +31,28 @@ class FileService(private val mediaRepository: MediaRepository) {
         ).id
     }
 
+    @Transactional
+    fun saveFiles(files: List<MultipartFile>): List<Long> {
+        if (files.isEmpty()) throw FileValidationException(MediaError.FILES_EMPTY)
+
+        val entities = files.map { file ->
+            if (file.isEmpty) throw FileValidationException(MediaError.FILE_EMPTY)
+
+            val name = file.originalFilename ?: throw FileValidationException(MediaError.FILE_NAME_MISSING)
+
+            validateFileExtension(name)
+
+            MediaEntity(
+                fileName = name,
+                contentType = file.contentType ?: "application/octet-stream",
+                size = file.size,
+                data = file.bytes
+            )
+        }
+
+        return mediaRepository.saveAll(entities).map { it.id }
+    }
+
     private fun validateFileExtension(fileName: String) {
         fileName
             .substringAfterLast('.', "")
@@ -42,9 +63,14 @@ class FileService(private val mediaRepository: MediaRepository) {
     }
 
     @Transactional
-    fun deletePhoto(id: Long) {
+    fun deleteFile(id: Long) {
         if (!mediaRepository.existsById(id)) throw FileNotFoundException()
         mediaRepository.deleteById(id)
+    }
+
+    @Transactional
+    fun deleteFiles(ids: List<Long>) {
+        mediaRepository.deleteAllByIdInBatch(ids)
     }
 
     companion object {
