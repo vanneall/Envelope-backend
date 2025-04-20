@@ -2,6 +2,7 @@ package com.point.chats.v2.users.service
 
 import com.point.chats.v2.chats.data.entity.document.ChatDocument
 import com.point.chats.v2.chats.data.entity.document.ChatType
+import com.point.chats.v2.chats.data.entity.document.ChatUser
 import com.point.chats.v2.chats.data.entity.document.UserDocument
 import com.point.chats.v2.chats.data.entity.document.addChat
 import com.point.chats.v2.chats.data.repository.ChatRepositoryV2
@@ -18,7 +19,7 @@ class UserService(private val userRepository: UserRepository, private val chatsR
 
         var personalChat = ChatDocument(
             type = ChatType.PRIVATE,
-            participants = listOf(username),
+            participants = listOf(ChatUser(username)),
             name = ChatType.PRIVATE.name,
             description = null,
         )

@@ -7,13 +7,20 @@ import com.point.chats.events.data.persistance.entities.toMessageMeta
 import com.point.chats.events.data.rest.meta.BaseMeta
 import com.point.chats.v2.chats.data.entity.document.ChatDocument
 import com.point.chats.v2.chats.data.entity.document.ChatType
+import com.point.chats.v2.chats.data.entity.document.ChatUser
+import com.point.chats.v2.chats.data.entity.document.GroupChatUser
+import com.point.chats.v2.chats.data.entity.document.UserRole
 import com.point.chats.v2.chats.data.entity.document.addChat
 import com.point.chats.v2.chats.data.repository.ChatRepositoryV2
 import com.point.chats.v2.chats.data.repository.UserRepository
+import com.point.chats.v2.chats.rest.UpdatedUserRole
 import com.point.chats.v2.chats.rest.response.ChatInfoShort
+import com.point.chats.v2.chats.rest.response.GroupChatInfo
 import com.point.chats.v2.chats.rest.response.Message
+import com.point.chats.v2.chats.rest.response.toGroupUser
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import kotlin.jvm.optionals.getOrNull
 
 @Service
 class ChatService(
@@ -31,7 +38,7 @@ class ChatService(
         return if (isOneToOneChat(allParticipants)) {
             createOneToOneChat(allParticipants)
         } else {
-            createGroupChat(allParticipants)
+            createGroupChat(requireNotNull(name), userId, allParticipants)
         }
     }
 
@@ -54,7 +61,7 @@ class ChatService(
     private fun createOneToOneChat(users: List<String>): String {
         val newOneToOneChat = ChatDocument(
             type = ChatType.ONE_ON_ONE,
-            participants = users,
+            participants = users.map { ChatUser(it) },
             name = null,
             events = mutableListOf(ChatCreatedEvent())
         )
@@ -71,8 +78,25 @@ class ChatService(
         return chatId
     }
 
-    private fun createGroupChat(users: List<String>): String {
-        throw NotImplementedError()
+    private fun createGroupChat(name: String, adminId: String, users: List<String>): String {
+        val newOneToOneChat = ChatDocument(
+            type = ChatType.MANY,
+            participants = users.map {
+                GroupChatUser(
+                    id = it,
+                    userRole = if (it == adminId) UserRole.admin else UserRole.simple
+                )
+            },
+            name = name,
+            events = mutableListOf(ChatCreatedEvent())
+        )
+        val chatId = chatRepository.save(newOneToOneChat).id!!
+        users.forEach { userId ->
+            val user = userRepository.findById(userId).get()
+            user.chatIds.add(chatId)
+            userRepository.save(user)
+        }
+        return chatId
     }
 
     fun deleteChat(userId: String, chatId: String) {
@@ -80,9 +104,9 @@ class ChatService(
             IllegalArgumentException("Чат не найден")
         }
 
-        require(userId in chat.participants) { "Вы не являетесь участником этого чата" }
+        require(userId in chat.participants.map { it.id }) { "Вы не являетесь участником этого чата" }
 
-        chat.participants.forEach { participantId ->
+        chat.participants.map { it.id }.forEach { participantId ->
             val user = userRepository.findById(participantId).orElse(null) ?: return@forEach
             user.chatIds.remove(chatId)
             userRepository.save(user)
@@ -93,7 +117,7 @@ class ChatService(
 
     private fun saveChat(chat: ChatDocument): String {
         val savedChat = chatRepository.save(chat)
-        savedChat.participants.forEach { userId ->
+        savedChat.participants.map { it.id }.forEach { userId ->
             val userDoc = userRepository.findById(userId).orElse(
                 com.point.chats.v2.chats.data.entity.document.UserDocument(
                     userId
@@ -119,7 +143,7 @@ class ChatService(
                 chat.type == ChatType.ONE_ON_ONE
             }
             .flatMap { chat ->
-                chat.participants.filter { id ->
+                chat.participants.map { it.id }.filter { id ->
                     id != userId
                 }
             }
@@ -137,20 +161,33 @@ class ChatService(
             }
             when (entity.type) {
                 ChatType.ONE_ON_ONE -> {
-                    val otherUserId = entity.participants.first { it != userId }
+                    val otherUserId = entity.participants.map { it.id }.first { it != userId }
                     val additional = additionalData.first { it.username == otherUserId }
                     ChatInfoShort(
                         id = chatId,
                         name = additional.name,
                         photo = additional.photoId,
+                        type = ChatType.ONE_ON_ONE,
                         lastMessage = message,
                     )
                 }
+
                 ChatType.PRIVATE -> {
                     ChatInfoShort(
                         id = chatId,
                         name = entity.name!!,
                         photo = null,
+                        type = ChatType.PRIVATE,
+                        lastMessage = message,
+                    )
+                }
+
+                ChatType.MANY -> {
+                    ChatInfoShort(
+                        id = chatId,
+                        name = entity.name!!,
+                        photo = null,
+                        type = ChatType.MANY,
                         lastMessage = message,
                     )
                 }
@@ -164,7 +201,78 @@ class ChatService(
                 val info = clientService.getUserLightweightInfo(event.senderId, listOf(event.senderId)).first()
                 event.toMessageMeta(info)
             }
+
             else -> null
         }
+    }
+
+    fun getGroupChatInfo(userId: String, chatId: String): GroupChatInfo {
+        val chat = chatRepository.findById(chatId).getOrNull() ?: throw IllegalArgumentException("Chat doesn't exist")
+
+        if (userId !in chat.participants.map { it.id }) throw IllegalArgumentException("Chat with user doesn't exist")
+
+        val additionalData = clientService.getUserLightweightInfo(userId, chat.participants.map { it.id }).toSet()
+        return GroupChatInfo(
+            id = chat.id!!,
+            name = chat.name!!,
+            description = chat.description,
+            type = ChatType.MANY,
+            chatPreviewPhotosIds = chat.photos,
+            users = chat.participants.map { user ->
+                val additional = additionalData.first { user.id == it.username }
+                (user as GroupChatUser).toGroupUser(additional.name, additional.photoId)
+            },
+            mediaContentIds = emptyList(),
+        )
+    }
+
+    fun updateUserRole(adminId: String, chatId: String, userId: String, updatedUserRole: UpdatedUserRole) {
+        val chat = chatRepository.findById(chatId).getOrNull() ?: throw IllegalArgumentException("Chat doesn't exist")
+
+        if (adminId !in chat.participants.map { it.id }) throw IllegalArgumentException("Chat with user doesn't exist")
+
+        val chatParticipants = chat.participants.map { it as GroupChatUser }
+        if (!chatParticipants.any { it.id == adminId && it.userRole.name == "admin" }) throw IllegalArgumentException("Not admin")
+
+        val user = chatParticipants.find { it.id == userId } ?: throw IllegalStateException("user doesn't exist")
+
+        saveChat(
+            chat.copy(
+                participants = chatParticipants.map {
+                    if (it.id == userId) {
+                        GroupChatUser(
+                            id = it.id,
+                            userRole = UserRole(
+                                name = updatedUserRole.name ?: it.userRole.name,
+                                canSentMessages = updatedUserRole.canSentMessages ?: it.userRole.canSentMessages,
+                                canInviteUsers = updatedUserRole.canInviteUsers ?: it.userRole.canInviteUsers,
+                                canPinMessages = updatedUserRole.canPinMessages ?: it.userRole.canPinMessages,
+                                canSetRoles = updatedUserRole.canSetRoles ?: it.userRole.canSetRoles,
+                                canDeleteUsers = updatedUserRole.canDeleteUsers ?: it.userRole.canDeleteUsers,
+                            )
+                        )
+                    } else {
+                        it
+                    }
+                }
+            )
+        )
+    }
+
+    fun deleteUserFromChat(adminId: String, chatId: String, userId: String) {
+        val chat = chatRepository.findById(chatId).getOrNull() ?: throw IllegalArgumentException("Chat doesn't exist")
+
+        val admin = chat.participants.first { it.id == adminId } as GroupChatUser
+        if (admin.userRole.name != "admin") return
+
+        val deletedUser = userRepository.getByUserId(userId).first()
+        deletedUser.chatIds.remove(chat.id)
+        userRepository.save(deletedUser)
+
+        chatRepository.save(
+            chat.copy(
+                participants = chat.participants.filter { it.id != userId }
+            )
+        )
     }
 }

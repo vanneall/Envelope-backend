@@ -3,4 +3,26 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="21" />
   </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Envelope-backend" options="-parameters" />
+      <module name="Envelope-backend.main" options="-parameters" />
+      <module name="Envelope-backend.test" options="-parameters" />
+      <module name="api-gateway" options="-parameters" />
+      <module name="api-gateway.main" options="-parameters" />
+      <module name="api-gateway.test" options="-parameters" />
+      <module name="authorization" options="-parameters" />
+      <module name="authorization.main" options="-parameters" />
+      <module name="authorization.test" options="-parameters" />
+      <module name="chats" options="-parameters" />
+      <module name="chats.main" options="-parameters" />
+      <module name="chats.test" options="-parameters" />
+      <module name="photo" options="-parameters" />
+      <module name="photo.main" options="-parameters" />
+      <module name="photo.test" options="-parameters" />
+      <module name="profiles" options="-parameters" />
+      <module name="profiles.main" options="-parameters" />
+      <module name="profiles.test" options="-parameters" />
+    </option>
+  </component>
 </project>

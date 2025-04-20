@@ -5,6 +5,7 @@ import com.point.chats.events.data.rest.meta.BaseMeta
 import com.point.chats.v2.chats.rest.requests.CreateChatRequest
 import com.point.chats.v2.chats.rest.response.ChatIdResponse
 import com.point.chats.v2.chats.rest.response.ChatInfoShortResponse
+import com.point.chats.v2.chats.rest.response.GroupChatInfo
 import com.point.chats.v2.chats.rest.response.toResponse
 import com.point.chats.v2.chats.service.ChatService
 import org.springframework.http.HttpStatus
@@ -60,7 +61,42 @@ class ChatsController(private val chatService: ChatService) {
     fun test() {
     }
 
+    @GetMapping("/group/{chatId}")
+    fun getGroupChatInfo(
+        @RequestHeader(USER_ID) userId: String,
+        @PathVariable chatId: String,
+    ): ResponseEntity<GroupChatInfo> = ResponseEntity.ok().body(chatService.getGroupChatInfo(userId, chatId))
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/group/{chatId}/{username}")
+    fun updateUserRole(
+        @RequestHeader(USER_ID) userId: String,
+        @PathVariable chatId: String,
+        @PathVariable username: String,
+        @RequestBody updatedUserRole: UpdatedUserRole,
+    ) {
+        chatService.updateUserRole(userId, chatId, username, updatedUserRole)
+    }
+
+    @DeleteMapping("/group/{chatId}/{username}")
+    fun deleteUserFromChat(
+        @RequestHeader(USER_ID) userId: String,
+        @PathVariable chatId: String,
+        @PathVariable username: String,
+    ) {
+        chatService.deleteUserFromChat(userId, chatId, username)
+    }
+
     private companion object {
         const val USER_ID = "X-User-ID"
     }
 }
+
+data class UpdatedUserRole(
+    val name: String?,
+    val canSentMessages: Boolean?,
+    val canInviteUsers: Boolean?,
+    val canPinMessages: Boolean?,
+    val canSetRoles: Boolean?,
+    val canDeleteUsers: Boolean?,
+)

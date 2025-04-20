@@ -1,6 +1,7 @@
 package com.point.chats.v2.chats.rest.response
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.point.chats.v2.chats.data.entity.document.ChatType
 import java.time.Instant
 
 data class ChatInfoShortResponse(
@@ -8,6 +9,8 @@ data class ChatInfoShortResponse(
     val id: String,
     @JsonProperty("name")
     val name: String,
+    @JsonProperty
+    val type: ChatType,
     @JsonProperty("photo")
     val photo: Long? = null,
     @JsonProperty("last_message")
@@ -27,6 +30,7 @@ fun ChatInfoShort.toResponse() = ChatInfoShortResponse(
     id = id,
     name = name,
     photo = photo,
+    type = type,
     lastMessage = lastMessage?.toResponse(),
 )
 
@@ -39,6 +43,7 @@ fun Message.toResponse() = MessageResponse(
 data class ChatInfoShort(
     val id: String,
     val name: String,
+    val type: ChatType,
     val photo: Long? = null,
     val lastMessage: Message? = null,
 )
