@@ -1,8 +1,8 @@
 package com.point.authorization.data.persistence
-import com.point.authorization.data.domain.User
+
+import com.point.authorization.data.domain.UserInfo
 import com.point.authorization.utils.PasswordHasher
 import jakarta.persistence.*
-import java.util.*
 
 @Entity
 @Table(name = "users")
@@ -22,7 +22,7 @@ data class UserEntity(
     val password: String
 )
 
-fun User.toEntity(): UserEntity = UserEntity(
+fun UserInfo.toEntity(): UserEntity = UserEntity(
     username = username,
     email = null,
     phoneNumber = null,

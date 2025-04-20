@@ -4,11 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.point.authorization.error.codes.ConstantCodes.BLANK_ARG
 import jakarta.validation.constraints.NotBlank
 
-data class UserAuthorizationRequest(
+class ForgotPasswordRequest(
     @field:NotBlank(message = BLANK_ARG)
     @JsonProperty("username")
     val username: String,
     @field:NotBlank(message = BLANK_ARG)
-    @JsonProperty("password")
-    val password: String,
+    @JsonProperty("new_password")
+    val newPassword: String,
+    @field:NotBlank(message = BLANK_ARG)
+    @JsonProperty("confirm_password")
+    val confirmPassword: String,
 )

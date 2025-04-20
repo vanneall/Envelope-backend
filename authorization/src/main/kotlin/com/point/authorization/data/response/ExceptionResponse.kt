@@ -1,3 +1,3 @@
 package com.point.authorization.data.response
 
-data class ExceptionResponse(val exceptionReason: String?)
+data class ExceptionResponse(val code: String)
