@@ -1,0 +1,21 @@
+package com.point.profiles.errors
+
+enum class ErrorCodes {
+    USERNAME_EMPTY,
+    NAME_EMPTY,
+    BIRTHDATE_INVALID,
+    PHOTO_UPLOAD_FAILED,
+
+    INVALID_BLOCK_MYSELF,
+
+    USER_BLOCKED,
+    USER_NOT_FOUND,
+    USER_ALREADY_EXISTS,
+    USER_ALREADY_FRIEND,
+    CANNOT_ADD_SELF,
+    REQUEST_NOT_OWNED,
+
+    REQUEST_ALREADY_SENT,
+    REQUEST_NOT_FOUND,
+    ;
+}
