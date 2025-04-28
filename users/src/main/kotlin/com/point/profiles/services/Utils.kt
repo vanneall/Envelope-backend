@@ -46,23 +46,14 @@ fun UserEntity.toUserDetailedInfo() = UserProfileDetailedResponse(
             inSentRequests = false,
         )
     },
-    blockedCount = blockedUsers.size,
-    blockedUsers = blockedUsers.map {
-        OtherUserResponse(
-            username = it.username,
-            name = it.name,
-            status = it.status,
-            lastPhoto = it.photos.firstOrNull(),
-            inContacts = false,
-            inSentRequests = false,
-        )
-    },
+    blockedCount = 0,
+    blockedUsers = emptyList(),
 )
 
 @Transactional
 fun UserEntity.toOtherUserResponse(userId: String, inContacts: Boolean, usernamesWithSentRequest: List<String>): OtherUserResponse {
     val inContacts = inContacts
-    val inSentRequests = !inContacts && userId in usernamesWithSentRequest
+    val inSentRequests = !inContacts && username in usernamesWithSentRequest
     return OtherUserResponse(
         username = username,
         name = name,
@@ -73,7 +64,8 @@ fun UserEntity.toOtherUserResponse(userId: String, inContacts: Boolean, username
     )
 }
 
-fun UserEntity.toRequestsInfoShort() = RequestsInfoResponse(
+fun UserEntity.toRequestsInfoShort(requestId: Long) = RequestsInfoResponse(
+    id = requestId,
     username = username,
     name = name,
     status = status,

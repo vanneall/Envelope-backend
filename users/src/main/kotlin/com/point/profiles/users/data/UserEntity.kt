@@ -40,6 +40,9 @@ data class UserEntity(
     )
     val contacts: MutableSet<UserEntity> = mutableSetOf(),
 
+    @ManyToMany(mappedBy = "contacts", fetch = FetchType.LAZY)
+    val contactedBy: MutableSet<UserEntity> = mutableSetOf(),
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "user_blocked",

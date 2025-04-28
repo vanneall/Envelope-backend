@@ -1,6 +1,5 @@
 package com.point.profiles.users.data
 
-import com.point.profiles.requests.data.RequestEntity
 import com.point.profiles.requests.errors.exceptions.RequestNotFoundException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

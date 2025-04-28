@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/contacts")
+@RequestMapping("/users/api-v2/contacts")
 class ContactsController(private val contactsService: ContactsService) {
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])

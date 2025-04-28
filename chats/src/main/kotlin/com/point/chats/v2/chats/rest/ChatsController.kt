@@ -3,12 +3,14 @@ package com.point.chats.v2.chats.rest
 
 import com.point.chats.events.data.rest.meta.BaseMeta
 import com.point.chats.v2.chats.rest.requests.CreateChatRequest
+import com.point.chats.v2.chats.rest.requests.DeleteChatsRequest
 import com.point.chats.v2.chats.rest.response.ChatIdResponse
 import com.point.chats.v2.chats.rest.response.ChatInfoShortResponse
 import com.point.chats.v2.chats.rest.response.GroupChatInfo
 import com.point.chats.v2.chats.rest.response.toResponse
 import com.point.chats.v2.chats.service.ChatService
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -31,6 +33,18 @@ class ChatsController(private val chatService: ChatService) {
         @PathVariable chatId: String
     ): ResponseEntity<Unit> {
         chatService.deleteChat(userId, chatId)
+        return ResponseEntity.ok(Unit)
+    }
+
+    @DeleteMapping(
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun deleteChats(
+        @RequestHeader(USER_ID) username: String,
+        @RequestBody deleteChatsRequest: DeleteChatsRequest,
+    ): ResponseEntity<Unit> {
+        chatService.deleteChats(username, deleteChatsRequest.chatIds)
+
         return ResponseEntity.ok(Unit)
     }
 

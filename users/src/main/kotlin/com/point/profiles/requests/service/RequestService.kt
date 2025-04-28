@@ -22,13 +22,13 @@ class RequestService(private val requestRepository: RequestRepository, private v
     fun getIncomingFriendRequests(username: String, limit: Int, offset: Int) =
         requestRepository.findIncomingRequests(username, PageRequest.of(offset, limit))
             .toList()
-            .map { it.producer.toRequestsInfoShort() }
+            .map { request -> request.producer.toRequestsInfoShort(requireNotNull(request.id)) }
 
     @Transactional(readOnly = true)
     fun getOutgoingRequests(username: String, limit: Int, offset: Int) =
         requestRepository.findOutgoingRequests(username, PageRequest.of(offset, limit))
             .toList()
-            .map { it.consumer.toRequestsInfoShort() }
+            .map { request -> request.consumer.toRequestsInfoShort(requireNotNull(request.id)) }
 
     @Transactional
     fun createRequest(producerId: String, createRequest: CreateRequest): Long {

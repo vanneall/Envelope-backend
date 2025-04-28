@@ -13,8 +13,8 @@ interface ContactsRepository : JpaRepository<UserEntity, String> {
     FROM UserEntity u
     JOIN u.contacts c
     WHERE u.username = :username
-      AND LOWER(c.name) LIKE LOWER(CONCAT('%', :query, '%'))
-    ORDER BY c.name ASC
+      AND LOWER(c.contact.name) LIKE LOWER(CONCAT('%', :query, '%'))
+    ORDER BY c.contact.name ASC
     """)
     fun findContactsFiltered(
         @Param("username") username: String,

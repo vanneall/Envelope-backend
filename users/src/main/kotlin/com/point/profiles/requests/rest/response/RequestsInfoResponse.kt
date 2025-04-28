@@ -3,6 +3,8 @@ package com.point.profiles.requests.rest.response
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class RequestsInfoResponse(
+    @JsonProperty("id")
+    val id: Long,
     @JsonProperty("username")
     val username: String,
     @JsonProperty("name")

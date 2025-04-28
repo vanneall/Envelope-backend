@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono
 @Service
 class UserService(webClientBuilder: WebClient.Builder) {
 
-    private val webClient = webClientBuilder.baseUrl("http://127.0.0.1:8083/users").build()
+    private val webClient = webClientBuilder.baseUrl("http://127.0.0.1:8083/users/api-v2").build()
 
     fun createUser(userInfo: UserInfo, photo: MultipartFile?): ResultInfo {
         val bodyBuilder = MultipartBodyBuilder().apply {
@@ -25,7 +25,7 @@ class UserService(webClientBuilder: WebClient.Builder) {
         }
 
         return webClient.post()
-            .uri("/api-v2")
+            .uri("/profile")
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .bodyValue(bodyBuilder.build())
             .retrieve()

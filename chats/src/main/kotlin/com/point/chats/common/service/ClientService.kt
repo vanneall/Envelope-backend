@@ -31,7 +31,7 @@ class ClientService(private val webClientBuilder: WebClient.Builder) {
             .get()
             .uri { uriBuilder ->
                 uriBuilder
-                    .path("/users/api-v2/all/lightweight")
+                    .path("/users/api-v2/light")
                     .queryParam("ids", *ids.toTypedArray())
                     .build()
             }
@@ -48,18 +48,6 @@ data class UserInfoShortResponse(
     val username: String,
     @JsonProperty("name")
     val name: String,
-    @JsonProperty("last_seen")
-    val lastSeen: LocalDateTime,
-    @JsonProperty("status")
-    val status: String?,
-    @JsonProperty("about")
-    val about: String?,
-    @JsonProperty("birth_date")
-    val birthDate: LocalDate,
-    @JsonProperty("photos")
-    val photos: List<Long>,
-    @JsonProperty("in_contacts")
-    val inContacts: Boolean,
-    @JsonProperty("in_sent_requests")
-    val inSentRequests: Boolean,
+    @JsonProperty("photo")
+    val photoId : Long? = null,
 )

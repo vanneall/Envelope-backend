@@ -9,7 +9,7 @@ data class ChatInfoShortResponse(
     val id: String,
     @JsonProperty("name")
     val name: String,
-    @JsonProperty
+    @JsonProperty("type")
     val type: ChatType,
     @JsonProperty("photo")
     val photo: Long? = null,

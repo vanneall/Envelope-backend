@@ -115,6 +115,12 @@ class ChatService(
         chatRepository.deleteById(chatId)
     }
 
+    fun deleteChats(username: String, chatIds: List<String>) {
+        chatIds.forEach { chatId ->
+            deleteChat(username, chatId)
+        }
+    }
+
     private fun saveChat(chat: ChatDocument): String {
         val savedChat = chatRepository.save(chat)
         savedChat.participants.map { it.id }.forEach { userId ->
