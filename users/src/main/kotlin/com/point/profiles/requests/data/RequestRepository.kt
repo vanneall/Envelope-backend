@@ -40,4 +40,7 @@ interface RequestRepository : JpaRepository<RequestEntity, Long> {
         @Param("producerUsername") producerUsername: String,
         @Param("targetUsernames") targetUsernames: Collection<String>
     ): List<String>
+
+    @Query("SELECT c.contact.username FROM ContactEntity c WHERE c.owner.username = :username")
+    fun findContactUsernamesByOwner(username: String): List<String>
 }

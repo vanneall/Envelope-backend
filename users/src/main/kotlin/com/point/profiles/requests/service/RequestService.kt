@@ -10,13 +10,19 @@ import com.point.profiles.requests.rest.requests.CreateRequest
 import com.point.profiles.requests.rest.requests.HandleRequest
 import com.point.profiles.requests.rest.requests.RequestHandleType
 import com.point.profiles.services.toRequestsInfoShort
+import com.point.profiles.users.data.ContactEntity
+import com.point.profiles.users.data.ContactRepository
 import com.point.profiles.users.data.findByIdOrThrow
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class RequestService(private val requestRepository: RequestRepository, private val userRepository: UserRepository) {
+class RequestService(
+    private val requestRepository: RequestRepository,
+    private val userRepository: UserRepository,
+    private val contactRepository: ContactRepository,
+) {
 
     @Transactional(readOnly = true)
     fun getIncomingFriendRequests(username: String, limit: Int, offset: Int) =
@@ -39,7 +45,7 @@ class RequestService(private val requestRepository: RequestRepository, private v
             throw UserException(ErrorCodes.CANNOT_ADD_SELF)
         }
 
-        if (consumer in producer.contacts) throw UserException(ErrorCodes.USER_ALREADY_FRIEND)
+        if (consumer in producer.contacts.map { consumer }) throw UserException(ErrorCodes.USER_ALREADY_FRIEND)
 
         if (requestExistsBetween(producer.username, consumer.username))
             throw UserException(ErrorCodes.REQUEST_ALREADY_SENT)
@@ -71,11 +77,14 @@ class RequestService(private val requestRepository: RequestRepository, private v
     private fun acceptRequest(requestId: Long) {
         val request = requestRepository.findByIdOrThrow(requestId)
 
-        val consumer = request.consumer
         val producer = request.producer
+        val consumer = request.consumer
 
-        consumer.contacts.add(producer)
-        producer.contacts.add(consumer)
+        val contact1 = ContactEntity(owner = producer, contact = consumer)
+        val contact2 = ContactEntity(owner = consumer, contact = producer)
+
+        contactRepository.save(contact1)
+        contactRepository.save(contact2)
 
         requestRepository.delete(request)
     }

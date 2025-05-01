@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/chats/api-v2")
@@ -21,9 +22,10 @@ class ChatsController(private val chatService: ChatService) {
     @PostMapping
     fun createChat(
         @RequestHeader(USER_ID) userId: String,
-        @RequestBody request: CreateChatRequest,
+        @RequestPart("data") request: CreateChatRequest,
+        @RequestPart("photo", required = false) photo: MultipartFile?,
     ): ResponseEntity<ChatIdResponse> {
-        val chatId = chatService.createChat(userId, request.participantIds, request.name)
+        val chatId = chatService.createChat(userId, request.participantIds, request.name, photo)
         return ResponseEntity.ok(ChatIdResponse(chatId))
     }
 

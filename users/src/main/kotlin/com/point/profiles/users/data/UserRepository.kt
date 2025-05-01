@@ -16,6 +16,13 @@ interface UserRepository : JpaRepository<UserEntity, String> {
     ORDER BY u.name ASC
     """)
     fun findByNameLikeIgnoreCase(@Param("query") query: String, pageable: Pageable): Page<UserEntity>
+
+    @Query("""
+    SELECT c.contact
+    FROM ContactEntity c
+    WHERE c.owner.username = :username
+""")
+    fun findContactsOfUser(@Param("username") username: String): List<UserEntity>
 }
 
 fun UserRepository.findByIdOrThrow(id: String): UserEntity = findById(id).orElseThrow { RequestNotFoundException() }

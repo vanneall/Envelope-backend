@@ -10,9 +10,11 @@ import org.springframework.transaction.annotation.Transactional
 
 
 @Transactional
-fun UserEntity.toUserShortInfo(userId: String, usernamesWithSentRequest: List<String>): UserInfoShortResponse {
-    val inContacts = contacts.any { it.username == userId }
+fun UserEntity.toUserShortInfo(userId: String, inContacts: Boolean, usernamesWithSentRequest: List<String>): UserInfoShortResponse {
+    println("блять")
+    println("сука")
     val inSentRequests = !inContacts && userId in usernamesWithSentRequest
+    println("тут")
     return UserInfoShortResponse(
         username = username,
         name = name,
@@ -36,7 +38,7 @@ fun UserEntity.toUserDetailedInfo() = UserProfileDetailedResponse(
     birthDate = birthDate,
     photos = photos.map { it.toString() },
     friendsCount = contacts.size,
-    friends = contacts.map {
+    friends = contacts.map { it.contact }.map {
         OtherUserResponse(
             username = it.username,
             name = it.name,

@@ -1,16 +1,12 @@
 package com.point.chats.v2.chats.service
 
 import com.point.chats.common.service.ClientService
+import com.point.chats.common.service.PhotoService
 import com.point.chats.events.data.persistance.entities.ChatCreatedEvent
 import com.point.chats.events.data.persistance.entities.MessageEvent
 import com.point.chats.events.data.persistance.entities.toMessageMeta
 import com.point.chats.events.data.rest.meta.BaseMeta
-import com.point.chats.v2.chats.data.entity.document.ChatDocument
-import com.point.chats.v2.chats.data.entity.document.ChatType
-import com.point.chats.v2.chats.data.entity.document.ChatUser
-import com.point.chats.v2.chats.data.entity.document.GroupChatUser
-import com.point.chats.v2.chats.data.entity.document.UserRole
-import com.point.chats.v2.chats.data.entity.document.addChat
+import com.point.chats.v2.chats.data.entity.document.*
 import com.point.chats.v2.chats.data.repository.ChatRepositoryV2
 import com.point.chats.v2.chats.data.repository.UserRepository
 import com.point.chats.v2.chats.rest.UpdatedUserRole
@@ -19,7 +15,9 @@ import com.point.chats.v2.chats.rest.response.GroupChatInfo
 import com.point.chats.v2.chats.rest.response.Message
 import com.point.chats.v2.chats.rest.response.toGroupUser
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 import kotlin.jvm.optionals.getOrNull
 
 @Service
@@ -27,19 +25,34 @@ class ChatService(
     private val userRepository: UserRepository,
     private val chatRepository: ChatRepositoryV2,
     private val clientService: ClientService,
+    private val photoService: PhotoService,
 ) {
 
-    fun createChat(userId: String, participantIds: List<String>, name: String?): String {
+    fun createChat(userId: String, participantIds: List<String>, name: String?, photo: MultipartFile?): String {
         val allParticipants = (listOf(userId) + participantIds).sorted()
 
         if (!isUsersUnique(allParticipants)) throw IllegalStateException("All participants must be unique")
         if (!isAllUsersExists(allParticipants)) throw IllegalStateException("Some user not exist")
 
-        return if (isOneToOneChat(allParticipants)) {
-            createOneToOneChat(allParticipants)
+        return if (name == null) {
+            checkIfChatAlreadyExists(userId, allParticipants.toSet())
+                ?: createOneToOneChat(allParticipants)
         } else {
-            createGroupChat(requireNotNull(name), userId, allParticipants)
+            createGroupChat(requireNotNull(name), userId, allParticipants, requireNotNull(photo))
         }
+    }
+
+    private fun checkIfChatAlreadyExists(requestOwner: String, allParticipants: Set<String>): String? {
+        val user = userRepository.findByIdOrNull(requestOwner) ?: return null
+
+        user.chatIds.forEach { chatId ->
+            chatRepository.findByIdOrNull(chatId)?.let { chat ->
+                if (chat.participants.map { it.id }.toSet() == allParticipants) {
+                    return chat.id
+                }
+            }
+        }
+        return null
     }
 
     private fun isUsersUnique(participants: List<String>): Boolean {
@@ -56,14 +69,13 @@ class ChatService(
         return count == participants.size.toLong()
     }
 
-    private fun isOneToOneChat(users: List<String>) = users.size == 2
-
     private fun createOneToOneChat(users: List<String>): String {
         val newOneToOneChat = ChatDocument(
             type = ChatType.ONE_ON_ONE,
             participants = users.map { ChatUser(it) },
             name = null,
-            events = mutableListOf(ChatCreatedEvent())
+            events = mutableListOf(ChatCreatedEvent()),
+            photos = mutableListOf(),
         )
         val chatId = chatRepository.save(newOneToOneChat).id!!
         val firstUser = userRepository.findById(users[0]).get()
@@ -78,7 +90,8 @@ class ChatService(
         return chatId
     }
 
-    private fun createGroupChat(name: String, adminId: String, users: List<String>): String {
+    private fun createGroupChat(name: String, adminId: String, users: List<String>, photo: MultipartFile): String {
+        val response = photoService.uploadPhoto(photo)
         val newOneToOneChat = ChatDocument(
             type = ChatType.MANY,
             participants = users.map {
@@ -88,7 +101,8 @@ class ChatService(
                 )
             },
             name = name,
-            events = mutableListOf(ChatCreatedEvent())
+            events = mutableListOf(ChatCreatedEvent()),
+            photos = listOf(response.id),
         )
         val chatId = chatRepository.save(newOneToOneChat).id!!
         users.forEach { userId ->
@@ -192,7 +206,7 @@ class ChatService(
                     ChatInfoShort(
                         id = chatId,
                         name = entity.name!!,
-                        photo = null,
+                        photo = entity.photos.lastOrNull(),
                         type = ChatType.MANY,
                         lastMessage = message,
                     )

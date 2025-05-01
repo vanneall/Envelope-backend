@@ -12,7 +12,7 @@ data class ChatDocument(
     val participants: List<ChatUser>,
     val name: String? = null,
     val description: String? = null,
-    val photos: List<Long> = emptyList(),
+    val photos: List<Long>,
     val events: MutableList<BaseEvent> = mutableListOf(),
     val pinnedMessage: BaseEvent? = null,
 )

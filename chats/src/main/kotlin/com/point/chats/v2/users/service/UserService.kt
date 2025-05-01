@@ -21,6 +21,7 @@ class UserService(private val userRepository: UserRepository, private val chatsR
             type = ChatType.PRIVATE,
             participants = listOf(ChatUser(username)),
             name = ChatType.PRIVATE.name,
+            photos = emptyList(),
             description = null,
         )
 

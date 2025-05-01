@@ -5,13 +5,18 @@ import com.point.profiles.contacts.errors.exceptions.UserNotInContactsException
 import com.point.profiles.contacts.repository.ContactsRepository
 import com.point.profiles.users.data.UserRepository
 import com.point.profiles.services.toUserContactResponse
+import com.point.profiles.users.data.ContactRepository
 import com.point.profiles.users.data.findByIdOrThrow
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class ContactsService(private val contactsRepository: ContactsRepository, private val userRepository: UserRepository) {
+class ContactsService(
+    private val contactsRepository: ContactsRepository,
+    private val userRepository: UserRepository,
+    private val contactRepository: ContactRepository,
+) {
 
     @Transactional(readOnly = true)
     fun getContacts(username: String, name: String?, limit: Int, offset: Int) =
@@ -26,9 +31,11 @@ class ContactsService(private val contactsRepository: ContactsRepository, privat
         if (username == deletedContact) throw SelfDeleteException()
 
         val user = userRepository.findByIdOrThrow(username)
-        val deletedUser = user.contacts.firstOrNull { it.username == deletedContact } ?: throw UserNotInContactsException()
+        val deletedContact =
+            user.contacts.firstOrNull { it.contact.username == deletedContact } ?: throw UserNotInContactsException()
 
-        user.contacts.remove(deletedUser)
-        deletedUser.contacts.remove(user)
+        deletedContact.owner.contacts.remove(deletedContact)
+        deletedContact.contact.contacts.remove(deletedContact)
+        contactRepository.delete(deletedContact)
     }
 }

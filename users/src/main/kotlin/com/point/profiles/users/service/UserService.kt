@@ -9,6 +9,7 @@ import com.point.profiles.users.data.UserLightweightInfo
 import com.point.profiles.services.toOtherUserResponse
 import com.point.profiles.services.toUserShortInfo
 import com.point.profiles.users.data.findByIdOrThrow
+import org.hibernate.Hibernate
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,16 +19,17 @@ class UserService(private val userRepository: UserRepository, private val reques
 
     @Transactional(readOnly = true)
     fun getUsers(username: String, name: String, limit: Int, offset: Int): UsersSearchResponse {
-        val user = userRepository.findByIdOrThrow(username)
-        val users = userRepository
+        val userContacts = userRepository.findContactsOfUser(username)
+        val globalUsers = userRepository
             .findByNameLikeIgnoreCase(name, PageRequest.of(offset, limit))
             .toList()
 
         val requests = requestRepository.findOutgoingRequests(username, PageRequest.of(0, 100))
             .toList()
             .map { it.consumer.username }
-        val inContacts = users.filter { it in user.contacts }
-        val notInContacts = users.filterNot { it in user.contacts }
+
+        val inContacts = globalUsers.filter { globalUser -> globalUser in userContacts }
+        val notInContacts = globalUsers.filterNot { globalUser -> globalUser in userContacts }
 
         return UsersSearchResponse(
             inContacts = inContacts.map { it.toOtherUserResponse(username, true, requests) },
@@ -49,6 +51,9 @@ class UserService(private val userRepository: UserRepository, private val reques
         val requests = requestRepository.findOutgoingRequests(username, PageRequest.of(0, 100))
             .toList()
             .map { it.consumer.username }
-        return userRepository.findByIdOrThrow(id).toUserShortInfo(username, requests)
+        println("точно")
+        val user = userRepository.findByIdOrThrow(id)
+        println("разъебалось")
+        return user.toUserShortInfo(username, username in requestRepository.findContactUsernamesByOwner(id), requests)
     }
 }

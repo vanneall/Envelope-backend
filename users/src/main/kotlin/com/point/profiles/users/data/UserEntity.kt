@@ -32,16 +32,8 @@ data class UserEntity(
     @Column(name = "photo_id")
     val photos: MutableList<Long> = mutableListOf(),
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "user_contacts",
-        joinColumns = [JoinColumn(name = "user_id")],
-        inverseJoinColumns = [JoinColumn(name = "contact_id")]
-    )
-    val contacts: MutableSet<UserEntity> = mutableSetOf(),
-
-    @ManyToMany(mappedBy = "contacts", fetch = FetchType.LAZY)
-    val contactedBy: MutableSet<UserEntity> = mutableSetOf(),
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+    val contacts: MutableSet<ContactEntity> = mutableSetOf(),
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param
 interface ContactsRepository : JpaRepository<UserEntity, String> {
 
     @Query("""
-    SELECT c
+    SELECT c.contact
     FROM UserEntity u
     JOIN u.contacts c
     WHERE u.username = :username
