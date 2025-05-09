@@ -13,6 +13,7 @@ import com.point.chats.v2.chats.rest.UpdatedUserRole
 import com.point.chats.v2.chats.rest.response.ChatInfoShort
 import com.point.chats.v2.chats.rest.response.GroupChatInfo
 import com.point.chats.v2.chats.rest.response.Message
+import com.point.chats.v2.chats.rest.response.MessageType
 import com.point.chats.v2.chats.rest.response.toGroupUser
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
@@ -171,14 +172,29 @@ class ChatService(
         val additionalData = clientService.getUserLightweightInfo(userId, oneToOneUserIds).toSet()
         return chats.map { entity ->
             val chatId = entity.id!!
-            val lastMessage = entity.events.firstOrNull { it is MessageEvent } as? MessageEvent
-            val message = lastMessage?.let {
-                Message(
-                    id = it.id,
-                    text = it.content,
-                    timestamp = it.timestamp,
-                )
+            val lastMessage = entity.events.firstOrNull()?.let {
+                val a = when (it) {
+                    is ChatCreatedEvent -> Message(
+                        id = it.id,
+                        text = "",
+                        type = MessageType.CREATED,
+                        timestamp = it.timestamp,
+                    )
+
+                    is MessageEvent -> Message(
+                        id = it.id,
+                        text = it.content,
+                        type = if (it.attachments.isNotEmpty()) MessageType.IMAGE else MessageType.TEXT,
+                        timestamp = it.timestamp
+                    )
+
+                    else -> null
+                }
+                a
             }
+
+            entity.events.firstOrNull { it is MessageEvent } as? MessageEvent
+
             when (entity.type) {
                 ChatType.ONE_ON_ONE -> {
                     val otherUserId = entity.participants.map { it.id }.first { it != userId }
@@ -188,7 +204,7 @@ class ChatService(
                         name = additional.name,
                         photo = additional.photoId,
                         type = ChatType.ONE_ON_ONE,
-                        lastMessage = message,
+                        lastMessage = lastMessage,
                     )
                 }
 
@@ -198,7 +214,7 @@ class ChatService(
                         name = entity.name!!,
                         photo = null,
                         type = ChatType.PRIVATE,
-                        lastMessage = message,
+                        lastMessage = lastMessage,
                     )
                 }
 
@@ -208,7 +224,7 @@ class ChatService(
                         name = entity.name!!,
                         photo = entity.photos.lastOrNull(),
                         type = ChatType.MANY,
-                        lastMessage = message,
+                        lastMessage = lastMessage,
                     )
                 }
             }

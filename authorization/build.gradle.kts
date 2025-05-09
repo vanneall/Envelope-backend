@@ -21,6 +21,9 @@ repositories {
 
 dependencies {
 
+    // Email
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+
     // Webflux
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")

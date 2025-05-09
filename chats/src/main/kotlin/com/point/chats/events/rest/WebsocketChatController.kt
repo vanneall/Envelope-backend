@@ -25,7 +25,7 @@ class WebSocketChatController(private val eventsService: EventsService) {
         createMessageRequest = CreateMessageRequest(
             senderId = principal.name,
             content = messageRequest.content,
-            photos = mutableListOf(),
+            photos = messageRequest.photos ?: listOf(),
         )
     )
 

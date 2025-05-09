@@ -37,17 +37,8 @@ fun UserEntity.toUserDetailedInfo() = UserProfileDetailedResponse(
     about = about,
     birthDate = birthDate,
     photos = photos.map { it.toString() },
-    friendsCount = contacts.size,
-    friends = contacts.map { it.contact }.map {
-        OtherUserResponse(
-            username = it.username,
-            name = it.name,
-            status = it.status,
-            lastPhoto = it.photos.firstOrNull(),
-            inContacts = true,
-            inSentRequests = false,
-        )
-    },
+    friendsCount = 0,
+    friends = emptyList(),
     blockedCount = 0,
     blockedUsers = emptyList(),
 )

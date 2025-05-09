@@ -23,4 +23,9 @@ data class UserRegistrationRequest(
     val birthDate: LocalDate = LocalDate.now(),
     @JsonProperty("is_dev")
     val isDeveloper: Boolean = false,
+    @JsonProperty("email")
+    val email: String,
+    @field:NotBlank(message = BLANK_ARG)
+    @JsonProperty("code")
+    val code: Int,
 )

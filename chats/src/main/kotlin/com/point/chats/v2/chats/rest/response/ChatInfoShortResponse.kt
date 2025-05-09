@@ -22,9 +22,17 @@ data class MessageResponse(
     val id: String,
     @JsonProperty("text")
     val text: String,
+    @JsonProperty("type")
+    val type: MessageType,
     @JsonProperty("timestamp")
     val timestamp: Instant,
 )
+
+enum class MessageType {
+    TEXT,
+    IMAGE,
+    CREATED,
+}
 
 fun ChatInfoShort.toResponse() = ChatInfoShortResponse(
     id = id,
@@ -37,6 +45,7 @@ fun ChatInfoShort.toResponse() = ChatInfoShortResponse(
 fun Message.toResponse() = MessageResponse(
     id = id,
     text = text,
+    type = type,
     timestamp = timestamp,
 )
 
@@ -51,5 +60,6 @@ data class ChatInfoShort(
 data class Message(
     val id: String,
     val text: String,
+    val type: MessageType,
     val timestamp: Instant,
 )

@@ -24,6 +24,7 @@ class AuthorizationService(
     private val userRepository: UserRepository,
     private val tokenFactory: TokenFactory,
     private val tokenParser: TokenParser,
+    private val emailCodeService: EmailCodeService,
 ) {
 
     @Transactional(readOnly = true)
@@ -41,16 +42,21 @@ class AuthorizationService(
 
     @Transactional
     fun register(userRegistration: UserRegistrationRequest, photo: MultipartFile?): TokenResponse {
-        if (userRepository.exists(userRegistration.username)) throw UserAlreadyExists()
+        val emailValid = emailCodeService.verifyCode(userRegistration.email, userRegistration.code.toString())
+        if (!emailValid) throw IllegalArgumentException()
 
+        if (userRepository.exists(userRegistration.username)) throw UserAlreadyExists()
         val userInfo = userRegistration.toUserInfo()
         userRepository.save(userInfo.toEntity())
-        return runCatching { userService.createUser( userInfo = userInfo, photo) }.fold(
-            onSuccess = {  createTokens(userInfo.username) },
-            onFailure = { throwable ->
+
+        return runCatching {
+            userService.createUser(userInfo, photo)
+        }.fold(
+            onSuccess = { createTokens(userInfo.username) },
+            onFailure = {
                 userRepository.deleteById(userInfo.username)
-                throw throwable
-            },
+                throw it
+            }
         )
     }
 

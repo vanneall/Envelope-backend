@@ -45,7 +45,8 @@ class RequestService(
             throw UserException(ErrorCodes.CANNOT_ADD_SELF)
         }
 
-        if (consumer in producer.contacts.map { consumer }) throw UserException(ErrorCodes.USER_ALREADY_FRIEND)
+        val req = requestRepository.findContactUsernamesByOwner(producer.username)
+        if (consumer.username in req) throw UserException(ErrorCodes.USER_ALREADY_FRIEND)
 
         if (requestExistsBetween(producer.username, consumer.username))
             throw UserException(ErrorCodes.REQUEST_ALREADY_SENT)

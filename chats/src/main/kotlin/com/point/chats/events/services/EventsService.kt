@@ -45,8 +45,13 @@ class EventsService(
     fun editMessage(chatId: String, editMessage: EditMessage) {
         val chat = chatRepository.findById(chatId).get()
         val events = chat.events
-            .filter { it.id == editMessage.messageId }
-            .map { (it as MessageEvent).copy(isEdited = true, content = editMessage.content) }
+            .map {
+                if (it.id == editMessage.messageId) {
+                    (it as MessageEvent).copy(isEdited = true, content = editMessage.content)
+                } else {
+                    it
+                }
+            }
         chatRepository.save(chat.copy(events = events.toMutableList()))
     }
 

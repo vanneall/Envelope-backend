@@ -1,11 +1,13 @@
 package com.point.authorization.rest.controller
 
+import com.point.authorization.data.domain.EmailRequest
 import com.point.authorization.data.request.ForgotPasswordRequest
 import com.point.authorization.data.request.RefreshTokenRequest
 import com.point.authorization.data.request.UserAuthorizationRequest
 import com.point.authorization.data.request.UserRegistrationRequest
 import com.point.authorization.data.response.TokenResponse
 import com.point.authorization.service.authorization.AuthorizationService
+import com.point.authorization.service.authorization.EmailCodeService
 import jakarta.validation.Valid
 import org.springframework.http.CacheControl
 import org.springframework.http.HttpStatus
@@ -24,7 +26,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 @RestController
 @RequestMapping("/auth/api-v2")
-class AuthorizationController(private val authorizationService: AuthorizationService) {
+class AuthorizationController(
+    private val authorizationService: AuthorizationService,
+    private val email: EmailCodeService,
+) {
 
     @PostMapping(
         "/login",
@@ -91,6 +96,12 @@ class AuthorizationController(private val authorizationService: AuthorizationSer
         return ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
             .body(tokens)
+    }
+
+    @PostMapping("/send-code")
+    fun sendEmailCode(@RequestBody request: EmailRequest): ResponseEntity<Unit> {
+        email.sendCode(request.email)
+        return ResponseEntity.ok().build()
     }
 
     @ResponseStatus(HttpStatus.OK)

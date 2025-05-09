@@ -22,7 +22,7 @@ class MediaService(webClientBuilder: WebClient.Builder) {
 
     fun uploadPhoto(photo: MultipartFile): PhotoIdResponse {
         val bodyBuilder = MultipartBodyBuilder()
-        bodyBuilder.part("photo", photo.resource)
+        bodyBuilder.part("file", photo.resource)
         return webClient.post()
             .uri("")
             .contentType(MediaType.MULTIPART_FORM_DATA)
